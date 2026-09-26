@@ -1,0 +1,38 @@
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 18px; /* Rule 6: readable at arm's length */
+}
+
+body {
+  margin: 0;
+  padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
+}
+
+main {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding-block: 2rem;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  padding: 0.5rem 0;
+}
+
+.muted {
+  opacity: 0.65;
+}
+
+.ok {
+  color: #16a34a;
+}
+
+.error,
+.degraded {
+  color: #dc2626;
+}

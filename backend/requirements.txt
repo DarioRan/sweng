@@ -1,0 +1,14 @@
+# Runtime
+fastapi==0.141.1
+uvicorn[standard]==0.53.0
+pydantic-settings==2.15.0
+sqlalchemy[asyncio]==2.0.54
+asyncpg==0.31.0
+qdrant-client==1.19.1        # keep in step with the qdrant image in docker-compose.yml
+minio==7.2.20
+python-multipart==0.0.32
+httpx==0.28.1
+
+# Development and CI (T-305)
+pytest==9.1.1
+ruff==0.16.8
