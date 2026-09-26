@@ -20,13 +20,17 @@ value has a default, so a clean checkout starts without it.
 | --------- | ---------------------------- | --------------------------------------- |
 | Web app   | http://localhost:5173        | Vite dev server, hot reload             |
 | Backend   | http://localhost:8000/docs   | FastAPI, OpenAPI for the §5.2 contracts |
-| Health    | http://localhost:8000/health | Probes PostgreSQL, Qdrant and MinIO     |
+| Health    | http://localhost:8000/health | Probes PostgreSQL, Qdrant and S3        |
 | Qdrant    | http://localhost:6333/dashboard |                                      |
-| MinIO     | http://localhost:9001        | `minioadmin` / `minioadmin`             |
+| S3 API    | http://localhost:8333        | SeaweedFS, `repair` / `repair-secret`   |
+| Files     | http://localhost:8888        | SeaweedFS file browser, localhost only  |
 | PostgreSQL| localhost:5432               | `repair` / `repair`, database `repair`  |
 
-`minio-init` is a one-shot container that creates the `manuals`, `figures` and
-`captures` buckets, then exits — that is expected.
+`seaweedfs-init` is a one-shot container that creates the `manuals`, `figures`
+and `captures` buckets, then exits — that is expected.
+
+The object store is SeaweedFS behind a plain S3 API. MinIO no longer publishes
+public container images, so it cannot be pulled from a clean checkout.
 
 ### Local model backend
 
@@ -58,7 +62,7 @@ docker-compose.yml     the stack (T-304)
 .env.example           every configurable value, with defaults
 backend/               FastAPI service layer (§5)
   app/config.py        settings from the environment
-  app/stores.py        PostgreSQL / Qdrant / MinIO clients and probes
+  app/stores.py        PostgreSQL / Qdrant / S3 clients and probes
   app/contracts.py     the five interface contracts (§5.2, T-202)
   app/routers/api.py   /api/detect, /ask, /figure, /transcribe, /documents
   tests/               contract-shape tests, no stores needed

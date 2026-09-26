@@ -5,7 +5,7 @@ pydantic-settings==2.15.0
 sqlalchemy[asyncio]==2.0.54
 asyncpg==0.31.0
 qdrant-client==1.19.1        # keep in step with the qdrant image in docker-compose.yml
-minio==7.2.20
+minio==7.2.20                # generic S3 client, used against SeaweedFS
 python-multipart==0.0.32
 httpx==0.28.1
 

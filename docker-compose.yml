@@ -9,7 +9,8 @@
 # .env file. Copy .env.example to .env to override anything.
 #
 # Storage (§5): PostgreSQL (users, jobs, sessions, provenance),
-#               Qdrant (manual chunks), MinIO (PDFs, figures, captures).
+#               Qdrant (manual chunks), SeaweedFS (S3 API: PDFs, figures,
+#               captures).
 # Service:      FastAPI backend.
 # Client:       phone-first web app (Vite dev server).
 # Model layer:  Ollama for the local/offline backend — opt-in via the
@@ -54,43 +55,59 @@ services:
       retries: 12
     restart: unless-stopped
 
-  minio:
-    image: quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z
-    command: server /data --console-address ":9001"
+  # S3-compatible object store. MinIO stopped publishing public images, so
+  # SeaweedFS stands in; the backend only speaks plain S3 to it.
+  seaweedfs:
+    image: chrislusf/seaweedfs:4.47
     environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-repair}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-repair-secret}
+    # SeaweedFS accepts any key unless given identities, so write one from the
+    # environment on every start. No anonymous identity: unsigned requests get 403.
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        mkdir -p /etc/seaweedfs
+        printf '{"identities":[{"name":"repair","credentials":[{"accessKey":"%s","secretKey":"%s"}],"actions":["Admin","Read","List","Tagging","Write"]}]}' \
+          "$$S3_ACCESS_KEY" "$$S3_SECRET_KEY" > /etc/seaweedfs/s3.json
+        exec weed server -dir=/data -ip.bind=0.0.0.0 -s3 -s3.config=/etc/seaweedfs/s3.json
     ports:
-      - "${MINIO_PORT:-9000}:9000"          # S3 API
-      - "${MINIO_CONSOLE_PORT:-9001}:9001"  # web console
+      - "${S3_PORT:-8333}:8333"                   # S3 API
+      - "127.0.0.1:${S3_FILER_PORT:-8888}:8888"   # file browser; bypasses S3 auth, so local only
     volumes:
-      - minio_data:/data
+      - s3_data:/data
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8333/healthz"]
       interval: 5s
       timeout: 3s
       retries: 12
     restart: unless-stopped
 
-  # Creates the three buckets once MinIO is healthy, then exits.
-  minio-init:
-    image: quay.io/minio/mc:RELEASE.2025-08-13T08-35-41Z
+  # Creates the three buckets once the store is healthy, then exits. The PUTs
+  # are signed, so this also proves the credentials work. 409 = already exists.
+  seaweedfs-init:
+    image: chrislusf/seaweedfs:4.47
     depends_on:
-      minio:
+      seaweedfs:
         condition: service_healthy
     environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
-      MINIO_BUCKET_MANUALS: ${MINIO_BUCKET_MANUALS:-manuals}
-      MINIO_BUCKET_FIGURES: ${MINIO_BUCKET_FIGURES:-figures}
-      MINIO_BUCKET_CAPTURES: ${MINIO_BUCKET_CAPTURES:-captures}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-repair}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-repair-secret}
+      S3_BUCKET_MANUALS: ${S3_BUCKET_MANUALS:-manuals}
+      S3_BUCKET_FIGURES: ${S3_BUCKET_FIGURES:-figures}
+      S3_BUCKET_CAPTURES: ${S3_BUCKET_CAPTURES:-captures}
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
         set -e
-        mc alias set local http://minio:9000 "$$MINIO_ROOT_USER" "$$MINIO_ROOT_PASSWORD"
-        for b in "$$MINIO_BUCKET_MANUALS" "$$MINIO_BUCKET_FIGURES" "$$MINIO_BUCKET_CAPTURES"; do
-          mc mb --ignore-existing "local/$$b"
+        for b in "$$S3_BUCKET_MANUALS" "$$S3_BUCKET_FIGURES" "$$S3_BUCKET_CAPTURES"; do
+          code=$$(curl -s -o /dev/null -w '%{http_code}' --aws-sigv4 "aws:amz:us-east-1:s3" \
+            --user "$$S3_ACCESS_KEY:$$S3_SECRET_KEY" -X PUT "http://seaweedfs:8333/$$b")
+          case "$$code" in
+            200|409) echo "bucket $$b ready ($$code)" ;;
+            *) echo "bucket $$b failed: HTTP $$code" >&2; exit 1 ;;
+          esac
         done
 
   # ---------------------------------------------------------------- service
@@ -101,12 +118,12 @@ services:
       SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-repair}:${POSTGRES_PASSWORD:-repair}@postgres:5432/${POSTGRES_DB:-repair}
       QDRANT_URL: http://qdrant:6333
-      MINIO_ENDPOINT: minio:9000
-      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
-      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
-      MINIO_BUCKET_MANUALS: ${MINIO_BUCKET_MANUALS:-manuals}
-      MINIO_BUCKET_FIGURES: ${MINIO_BUCKET_FIGURES:-figures}
-      MINIO_BUCKET_CAPTURES: ${MINIO_BUCKET_CAPTURES:-captures}
+      S3_ENDPOINT: seaweedfs:8333
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-repair}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-repair-secret}
+      S3_BUCKET_MANUALS: ${S3_BUCKET_MANUALS:-manuals}
+      S3_BUCKET_FIGURES: ${S3_BUCKET_FIGURES:-figures}
+      S3_BUCKET_CAPTURES: ${S3_BUCKET_CAPTURES:-captures}
       # Model layer (NFR-05): each backend sits behind an interface.
       LLM_BACKEND: ${LLM_BACKEND:-hosted}            # hosted | local
       LLM_HOSTED_API_KEY: ${LLM_HOSTED_API_KEY:-}
@@ -128,7 +145,7 @@ services:
         condition: service_healthy
       qdrant:
         condition: service_healthy
-      minio-init:
+      seaweedfs-init:
         condition: service_completed_successfully
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     healthcheck:
@@ -166,6 +183,6 @@ services:
 volumes:
   postgres_data:
   qdrant_data:
-  minio_data:
+  s3_data:
   model_cache:
   ollama_data:

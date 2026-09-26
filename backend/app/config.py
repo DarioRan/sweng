@@ -16,13 +16,13 @@ class Settings(BaseSettings):
     # Storage (§5)
     database_url: str = "postgresql+asyncpg://repair:repair@localhost:5432/repair"
     qdrant_url: str = "http://localhost:6333"
-    minio_endpoint: str = "localhost:9000"
-    minio_access_key: str = "minioadmin"
-    minio_secret_key: str = "minioadmin"
-    minio_secure: bool = False
-    minio_bucket_manuals: str = "manuals"
-    minio_bucket_figures: str = "figures"
-    minio_bucket_captures: str = "captures"
+    s3_endpoint: str = "localhost:8333"
+    s3_access_key: str = "repair"
+    s3_secret_key: str = "repair-secret"
+    s3_secure: bool = False
+    s3_bucket_manuals: str = "manuals"
+    s3_bucket_figures: str = "figures"
+    s3_bucket_captures: str = "captures"
 
     # Model layer (NFR-05): every backend is replaceable without touching call sites.
     llm_backend: Literal["hosted", "local"] = "hosted"

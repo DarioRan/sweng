@@ -2,7 +2,7 @@
 
 PostgreSQL — users, jobs, sessions, provenance
 Qdrant     — manual chunks (vector index)
-MinIO      — PDFs, figures, captures (object store)
+S3         — PDFs, figures, captures (object store; SeaweedFS in the dev stack)
 """
 
 import asyncio
@@ -20,7 +20,7 @@ from app.config import Settings
 class Stores:
     db: AsyncEngine
     qdrant: AsyncQdrantClient
-    minio: Minio
+    s3: Minio
     settings: Settings
 
     @classmethod
@@ -28,11 +28,12 @@ class Stores:
         return cls(
             db=create_async_engine(settings.database_url, pool_pre_ping=True),
             qdrant=AsyncQdrantClient(url=settings.qdrant_url),
-            minio=Minio(
-                settings.minio_endpoint,
-                access_key=settings.minio_access_key,
-                secret_key=settings.minio_secret_key,
-                secure=settings.minio_secure,
+            # The MinIO SDK is a plain S3 client; it talks to any S3-compatible store.
+            s3=Minio(
+                settings.s3_endpoint,
+                access_key=settings.s3_access_key,
+                secret_key=settings.s3_secret_key,
+                secure=settings.s3_secure,
             ),
             settings=settings,
         )
@@ -52,15 +53,15 @@ class Stores:
         await self.qdrant.get_collections()
         return True
 
-    async def probe_minio(self) -> bool:
+    async def probe_s3(self) -> bool:
         # The MinIO SDK is synchronous; keep it off the event loop.
         buckets = [
-            self.settings.minio_bucket_manuals,
-            self.settings.minio_bucket_figures,
-            self.settings.minio_bucket_captures,
+            self.settings.s3_bucket_manuals,
+            self.settings.s3_bucket_figures,
+            self.settings.s3_bucket_captures,
         ]
         results = await asyncio.gather(
-            *(asyncio.to_thread(self.minio.bucket_exists, b) for b in buckets)
+            *(asyncio.to_thread(self.s3.bucket_exists, b) for b in buckets)
         )
         missing = [b for b, ok in zip(buckets, results, strict=True) if not ok]
         if missing:
@@ -72,7 +73,7 @@ class Stores:
         probes = {
             "postgres": self.probe_postgres,
             "qdrant": self.probe_qdrant,
-            "minio": self.probe_minio,
+            "s3": self.probe_s3,
         }
         outcomes = await asyncio.gather(
             *(p() for p in probes.values()), return_exceptions=True
