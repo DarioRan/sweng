@@ -13,4 +13,6 @@ select = ["E", "F", "I", "B", "UP"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# Tests import `app` from the backend root, in CI and in the container.
+pythonpath = ["."]
 asyncio_mode = "auto"

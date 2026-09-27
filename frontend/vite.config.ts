@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
@@ -17,5 +18,9 @@ export default defineConfig({
       "/api": apiProxy,
       "/health": apiProxy,
     },
+  },
+  // `npm test` (CI test-frontend job). jsdom gives components a DOM to render into.
+  test: {
+    environment: "jsdom",
   },
 });
