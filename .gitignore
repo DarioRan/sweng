@@ -1,0 +1,33 @@
+# Secrets and local overrides
+.env
+docker-compose.override.yml
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+
+# Node
+node_modules/
+frontend/dist/
+*.local
+
+# Model weights, corpora and captured data — never committed (§1.4: no
+# redistribution of any manufacturer corpus)
+models/
+data/
+*.pt
+*.onnx
+*.pdf
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

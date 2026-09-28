@@ -1,0 +1,188 @@
+
+# Repair Assistant — development stack (T-304)
+#
+# One command on Windows 11, Ubuntu and macOS (NFR-01, NFR-04):
+#
+#     docker compose up
+#
+# Every variable below has a default, so a clean checkout starts without a
+# .env file. Copy .env.example to .env to override anything.
+#
+# Storage (§5): PostgreSQL (users, jobs, sessions, provenance),
+#               Qdrant (manual chunks), SeaweedFS (S3 API: PDFs, figures,
+#               captures).
+# Service:      FastAPI backend.
+# Client:       phone-first web app (Vite dev server).
+# Model layer:  Ollama for the local/offline backend — opt-in via the
+#               `local` profile so the default stack stays small:
+#
+#     docker compose --profile local up
+
+name: repair-assistant
+
+services:
+  # ---------------------------------------------------------------- storage
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-repair}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-repair}
+      POSTGRES_DB: ${POSTGRES_DB:-repair}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+
+  qdrant:
+    image: qdrant/qdrant:v1.19.1   # keep in step with qdrant-client in backend/requirements.txt
+    ports:
+      - "${QDRANT_PORT:-6333}:6333"   # REST + dashboard at /dashboard
+      - "${QDRANT_GRPC_PORT:-6334}:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    healthcheck:
+      # The image ships no curl; open the REST port through bash instead.
+      test: ["CMD-SHELL", "bash -c ':> /dev/tcp/127.0.0.1/6333' || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+
+  # S3-compatible object store. MinIO stopped publishing public images, so
+  # SeaweedFS stands in; the backend only speaks plain S3 to it.
+  seaweedfs:
+    image: chrislusf/seaweedfs:4.47
+    environment:
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-repair}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-repair-secret}
+    # SeaweedFS accepts any key unless given identities, so write one from the
+    # environment on every start. No anonymous identity: unsigned requests get 403.
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        mkdir -p /etc/seaweedfs
+        printf '{"identities":[{"name":"repair","credentials":[{"accessKey":"%s","secretKey":"%s"}],"actions":["Admin","Read","List","Tagging","Write"]}]}' \
+          "$$S3_ACCESS_KEY" "$$S3_SECRET_KEY" > /etc/seaweedfs/s3.json
+        exec weed server -dir=/data -ip.bind=0.0.0.0 -s3 -s3.config=/etc/seaweedfs/s3.json
+    ports:
+      - "${S3_PORT:-8333}:8333"                   # S3 API
+      - "127.0.0.1:${S3_FILER_PORT:-8888}:8888"   # file browser; bypasses S3 auth, so local only
+    volumes:
+      - s3_data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8333/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+
+  # Creates the three buckets once the store is healthy, then exits. The PUTs
+  # are signed, so this also proves the credentials work. 409 = already exists.
+  seaweedfs-init:
+    image: chrislusf/seaweedfs:4.47
+    depends_on:
+      seaweedfs:
+        condition: service_healthy
+    environment:
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-repair}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-repair-secret}
+      S3_BUCKET_MANUALS: ${S3_BUCKET_MANUALS:-manuals}
+      S3_BUCKET_FIGURES: ${S3_BUCKET_FIGURES:-figures}
+      S3_BUCKET_CAPTURES: ${S3_BUCKET_CAPTURES:-captures}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        set -e
+        for b in "$$S3_BUCKET_MANUALS" "$$S3_BUCKET_FIGURES" "$$S3_BUCKET_CAPTURES"; do
+          code=$$(curl -s -o /dev/null -w '%{http_code}' --aws-sigv4 "aws:amz:us-east-1:s3" \
+            --user "$$S3_ACCESS_KEY:$$S3_SECRET_KEY" -X PUT "http://seaweedfs:8333/$$b")
+          case "$$code" in
+            200|409) echo "bucket $$b ready ($$code)" ;;
+            *) echo "bucket $$b failed: HTTP $$code" >&2; exit 1 ;;
+          esac
+        done
+
+  # ---------------------------------------------------------------- service
+  backend:
+    build: ./backend
+    environment:
+      APP_ENV: ${APP_ENV:-development}
+      SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-repair}:${POSTGRES_PASSWORD:-repair}@postgres:5432/${POSTGRES_DB:-repair}
+      QDRANT_URL: http://qdrant:6333
+      S3_ENDPOINT: seaweedfs:8333
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-repair}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-repair-secret}
+      S3_BUCKET_MANUALS: ${S3_BUCKET_MANUALS:-manuals}
+      S3_BUCKET_FIGURES: ${S3_BUCKET_FIGURES:-figures}
+      S3_BUCKET_CAPTURES: ${S3_BUCKET_CAPTURES:-captures}
+      # Model layer (NFR-05): each backend sits behind an interface.
+      LLM_BACKEND: ${LLM_BACKEND:-hosted}            # hosted | local
+      LLM_HOSTED_API_KEY: ${LLM_HOSTED_API_KEY:-}
+      LLM_LOCAL_URL: ${LLM_LOCAL_URL:-http://ollama:11434}
+      LLM_LOCAL_MODEL: ${LLM_LOCAL_MODEL:-llama3.2:3b}
+      EMBEDDER_MODEL: ${EMBEDDER_MODEL:-BAAI/bge-small-en-v1.5}
+      DETECTOR_WEIGHTS: ${DETECTOR_WEIGHTS:-/models/detector.pt}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+      # Bind mounts from Windows/macOS hosts do not deliver inotify events;
+      # polling makes --reload work on every platform (NFR-01).
+      WATCHFILES_FORCE_POLLING: "true"
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    volumes:
+      - ./backend:/app          # live reload in development
+      - model_cache:/models     # detector weights, embedder cache
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+      seaweedfs-init:
+        condition: service_completed_successfully
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/health').status == 200 else 1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 15s
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------- client
+  frontend:
+    build: ./frontend
+    environment:
+      VITE_API_PROXY: http://backend:8000
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules       # keep the container's install, not the host's
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  # ---------------------------------------------------------------- models
+  ollama:
+    image: ollama/ollama:0.6.8
+    profiles: ["local"]
+    ports:
+      - "${OLLAMA_PORT:-11434}:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  qdrant_data:
+  s3_data:
+  model_cache:
+  ollama_data:
