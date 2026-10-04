@@ -65,6 +65,7 @@ backend/               FastAPI service layer (§5)
   app/stores.py        PostgreSQL / Qdrant / S3 clients and probes
   app/contracts.py     the five interface contracts (§5.2, T-202)
   app/routers/api.py   /api/detect, /ask, /figure, /transcribe, /documents
+  app/vision/          frozen component classes, COCO schema (T-306, ADR 0002)
   tests/               contract-shape tests, no stores needed
 frontend/              phone-first web client (Vite + React)
 infra/postgres/init/   SQL run once on an empty database volume

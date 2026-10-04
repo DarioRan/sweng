@@ -1,0 +1,15 @@
+{
+  "categories": [
+    { "id": 1, "name": "rear_derailleur", "supercategory": "drivetrain" },
+    { "id": 2, "name": "front_derailleur", "supercategory": "drivetrain" },
+    { "id": 3, "name": "cassette", "supercategory": "drivetrain" },
+    { "id": 4, "name": "chain", "supercategory": "drivetrain" },
+    { "id": 5, "name": "crankset", "supercategory": "drivetrain" },
+    { "id": 6, "name": "bottom_bracket", "supercategory": "drivetrain" },
+    { "id": 7, "name": "pedal", "supercategory": "drivetrain" },
+    { "id": 8, "name": "shift_brake_lever", "supercategory": "control" },
+    { "id": 9, "name": "disc_brake_caliper", "supercategory": "brake" },
+    { "id": 10, "name": "disc_rotor", "supercategory": "brake" },
+    { "id": 11, "name": "rim_brake_caliper", "supercategory": "brake" }
+  ]
+}
