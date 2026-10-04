@@ -4,7 +4,8 @@
 - **Date:** 2026-09-28
 - **Deciders:** Sneha Chaudhary, Narmeen Sabah Siddiqui, Dario Ranieri, Yernur Polatbek
 - **Issue:** #6 (T-308, Sprint 2, Vision, P1)
-- **Related:** frozen component class list (T-306, #11)
+- **Related:** frozen component class list (T-306, #11), recorded as ADR 0002
+- **Amended:** 2026-10-05: class overlap checked against the frozen list (#11)
 
 ---
 
@@ -65,7 +66,7 @@ Two candidates were surveyed against three criteria:
 | Handles missing and occluded parts | Yes, explicitly labelled | No |
 | Reference code | None | None for the segmented images |
 
-**DelftBikes wins this criterion decisively.** Its class list is not ours — there is no derailleur, cassette or chainring, so it supplies no labels we can use directly — but it is a genuine bike-part vocabulary annotated on real photographs in the format we need. That is what a pretraining stage requires.
+**DelftBikes wins this criterion decisively.** Its class list overlaps ours only in part. Of our eleven frozen classes, two match directly (`chain`, and `pedal` from its front and back pedal), two may match its hand brakes, and seven have no counterpart: there is no derailleur, cassette, crankset, bottom bracket or disc brake. The table is in ADR 0002. So DelftBikes supplies few labels we can use directly, but it is a genuine bike-part vocabulary annotated on real photographs in the format we need. That is what a pretraining stage requires.
 
 **The task framing also matches ours more closely than the class list suggests.** The dataset was built to study a specific failure: detectors hallucinating parts that are not present. Figure 4 of the paper shows why — averaging the position and size of all 22 parts reproduces the outline of a bicycle, so detectors learn strong positional priors and then predict absent parts at their expected locations with high IoU. That is precisely the failure mode our Rule 2 ("no component claimed without a detection") exists to prevent. Adopting DelftBikes therefore gives us a published characterisation of the failure, an evaluation measure for it (the authors' recall-based Fvv score, weighting a hallucinated part ten times more costly than a missed one), and baseline numbers for three detectors.
 
@@ -145,7 +146,7 @@ Neither dataset advances the AR extension. That option is protected instead by t
 ## Open items before this ADR moves to Accepted
 
 1. BIKED data licence: check the Harvard Dataverse record at doi:10.7910/DVN/GHQEDP and record the outcome. If it too states nothing, record that with the date — an unstated licence is a complete finding.
-2. Class overlap: once the class list is frozen (#11), tabulate our 10–12 classes against DelftBikes' 22 so the relationship is checkable rather than asserted.
+2. ~~Class overlap: once the class list is frozen (#11), tabulate our 10–12 classes against DelftBikes' 22 so the relationship is checkable rather than asserted.~~ Done in ADR 0002 (2026-10-05): two direct matches, two possible, seven none.
 3. NFR-S4: raise the target figure with the team in light of the published AP results, and either revise it or record why it stands.
 4. Inspect DelftBikes' annotation format and confirm the conversion effort before T-201 is estimated.
 5. Decision agreed by the team, and the draft wording replaced with what was decided, by whom, and when.
@@ -153,7 +154,7 @@ Neither dataset advances the AR extension. That option is protected instead by t
 ## References
 
 - Issue #6 (T-308) — this survey
-- Issue #11 (T-306) — frozen component class list
+- Issue #11 (T-306) — frozen component class list; ADR 0002
 - SDD-01 §8.1 — data sources · §8.2 and NFR-S4 — how detection is measured · §9.6 — repository policy on large files and third-party corpora
 - Kayhan, O. S., Vredebregt, B., & van Gemert, J. C. (2021). *DelftBikes, data underlying the publication: Hallucination in Object Detection — A Study in Visual Part Verification* (Version 2) [Dataset]. 4TU.ResearchData. https://doi.org/10.4121/14866116
 - Kayhan, O. S., Vredebregt, B., & van Gemert, J. C. (2021). Hallucination in Object Detection: A Study in Visual Part Verification. *IEEE ICIP 2021*. arXiv:2106.02523
