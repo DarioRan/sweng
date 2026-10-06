@@ -1,0 +1,28 @@
+file_name,doc_code,revision,title,components,source_url,licence_basis,retrieval_date
+DM-CN0001-07-ENG.pdf,DM-CN0001,07,Chain (11-speed),chain,https://si.shimano.com/en/pdfs/dm/CN0001/DM-CN0001-07-ENG.pdf,shimano-tou-private,2026-10-06
+DM-CN0002-01-ENG.pdf,DM-CN0002,01,Chain,chain,https://si.shimano.com/en/pdfs/dm/CN0002/DM-CN0002-01-ENG.pdf,shimano-tou-private,2026-10-05
+DM-FD0001-03-ENG.pdf,DM-FD0001,03,Front Derailleur,front_derailleur,https://si.shimano.com/en/pdfs/dm/FD0001/DM-FD0001-03-ENG.pdf,shimano-tou-private,2026-10-05
+DM-FD0003-06-ENG.pdf,DM-FD0003,06,Front Derailleur,front_derailleur,https://si.shimano.com/en/pdfs/dm/FD0003/DM-FD0003-06-ENG.pdf,shimano-tou-private,2026-10-05
+DM-GADBR01-09-ENG.pdf,DM-GADBR01,09,Hydraulic Disc Brake and Dual Control Lever (GRX),shift_brake_lever|disc_brake_caliper|disc_rotor,https://si.shimano.com/en/pdfs/dm/GADBR01/DM-GADBR01-09-ENG.pdf,shimano-tou-private,2026-10-05
+DM-GAFC001-06-ENG.pdf,DM-GAFC001,06,Crankset and Bottom Bracket (GRX),crankset|bottom_bracket,https://si.shimano.com/en/pdfs/dm/GAFC001/DM-GAFC001-06-ENG.pdf,shimano-tou-private,2026-10-05
+DM-LACS001-01-ENG.pdf,DM-LACS001,01,Cassette Sprocket,cassette,https://si.shimano.com/en/pdfs/dm/LACS001/DM-LACS001-01-ENG.pdf,shimano-tou-private,2026-10-05
+DM-LADBR01-04-ENG.pdf,DM-LADBR01,04,Hydraulic Disc Brake (CUES),shift_brake_lever|disc_brake_caliper|disc_rotor,https://si.shimano.com/en/pdfs/dm/LADBR01/DM-LADBR01-04-ENG.pdf,shimano-tou-private,2026-10-05
+DM-MACN001-08-ENG.pdf,DM-MACN001,08,Chain (12-speed),chain,https://si.shimano.com/en/pdfs/dm/MACN001/DM-MACN001-08-ENG.pdf,shimano-tou-private,2026-10-05
+DM-MACS001-05-ENG.pdf,DM-MACS001,05,Cassette (MTB 12-speed),cassette,https://si.shimano.com/en/pdfs/dm/MACS001/DM-MACS001-05-ENG.pdf,shimano-tou-private,2026-10-06
+DM-MACS010-02-ENG.pdf,DM-MACS010,02,Cassette (MTB),cassette,https://si.shimano.com/en/pdfs/dm/MACS010/DM-MACS010-02-ENG.pdf,shimano-tou-private,2026-10-05
+DM-MADBR01-08-ENG.pdf,DM-MADBR01,08,Hydraulic Disc Brake (XTR Deore XT SLX),shift_brake_lever|disc_brake_caliper|disc_rotor,https://si.shimano.com/en/pdfs/dm/MADBR01/DM-MADBR01-08-ENG.pdf,shimano-tou-private,2026-10-05
+DM-MAPD001-07-ENG.pdf,DM-MAPD001,07,SPD Pedals,pedal,https://si.shimano.com/en/pdfs/dm/MAPD001/DM-MAPD001-07-ENG.pdf,shimano-tou-private,2026-10-05
+DM-MARD001-06-ENG.pdf,DM-MARD001,06,Rear Derailleur (XTR Deore XT SLX Deore),rear_derailleur,https://si.shimano.com/en/pdfs/dm/MARD001/DM-MARD001-06-ENG.pdf,shimano-tou-private,2026-10-05
+DM-MBFC001-04-ENG.pdf,DM-MBFC001,04,Crankset and Bottom Bracket (Deore XT SLX Deore),crankset|bottom_bracket,https://si.shimano.com/en/pdfs/dm/MBFC001/DM-MBFC001-04-ENG.pdf,shimano-tou-private,2026-10-05
+DM-MDFC001-06-ENG.pdf,DM-MDFC001,06,Crankset and Bottom Bracket (Alivio Acera),crankset|bottom_bracket,https://si.shimano.com/en/pdfs/dm/MDFC001/DM-MDFC001-06-ENG.pdf,shimano-tou-private,2026-10-05
+DM-MDSL002-00-ENG.pdf,DM-MDSL002,00,Shifting Lever (Alivio),shift_brake_lever,https://si.shimano.com/en/pdfs/dm/MDSL002/DM-MDSL002-00-ENG.pdf,shimano-tou-private,2026-10-05
+DM-PD0001-05-ENG.pdf,DM-PD0001,05,Flat Pedal,pedal,https://si.shimano.com/en/pdfs/dm/PD0001/DM-PD0001-05-ENG.pdf,shimano-tou-private,2026-10-05
+DM-PD0002-07-ENG.pdf,DM-PD0002,07,Pedal (SPD-SL and SPD),pedal,https://si.shimano.com/en/pdfs/dm/PD0002/DM-PD0002-07-ENG.pdf,shimano-tou-private,2026-10-05
+DM-RACBR01-03-ENG.pdf,DM-RACBR01,03,Caliper Brake (rim),rim_brake_caliper|shift_brake_lever,https://si.shimano.com/en/pdfs/dm/RACBR01/DM-RACBR01-03-ENG.pdf,shimano-tou-private,2026-10-05
+DM-RACS001-03-ENG.pdf,DM-RACS001,03,Cassette (road 11-speed),cassette,https://si.shimano.com/en/pdfs/dm/RACS001/DM-RACS001-03-ENG.pdf,shimano-tou-private,2026-10-05
+DM-RADBR01-11-ENG.pdf,DM-RADBR01,11,Hydraulic Disc Brake and Dual Control Lever (Dura-Ace Ultegra 105),shift_brake_lever|disc_brake_caliper|disc_rotor,https://si.shimano.com/en/pdfs/dm/RADBR01/DM-RADBR01-11-ENG.pdf,shimano-tou-private,2026-10-05
+DM-RARD010-07-ENG.pdf,DM-RARD010,07,Rear Derailleur (road Di2),rear_derailleur,https://si.shimano.com/en/pdfs/dm/RARD010/DM-RARD010-07-ENG.pdf,shimano-tou-private,2026-10-05
+DM-RBCS001-05-ENG.pdf,DM-RBCS001,05,Cassette,cassette,https://si.shimano.com/en/pdfs/dm/RBCS001/DM-RBCS001-05-ENG.pdf,shimano-tou-private,2026-10-05
+DM-RD0001-06-ENG.pdf,DM-RD0001,06,MTB Rear Derailleur (Shadow RD),rear_derailleur,https://si.shimano.com/en/pdfs/dm/RD0001/DM-RD0001-06-ENG.pdf,shimano-tou-private,2026-10-05
+DM-SL0002-07-ENG.pdf,DM-SL0002,07,Shifter (Revoshift and Tourney),shift_brake_lever,https://si.shimano.com/en/pdfs/dm/SL0002/DM-SL0002-07-ENG.pdf,shimano-tou-private,2026-10-05
+DM-TORQUE-04-ENG.pdf,DM-TORQUE,04,Torque Chart (all series),rear_derailleur|front_derailleur|cassette|chain|crankset|bottom_bracket|pedal|shift_brake_lever|disc_brake_caliper|disc_rotor|rim_brake_caliper,https://si.shimano.com/en/pdfs/dm/TORQUE/DM-TORQUE-04-ENG.pdf,shimano-tou-private,2026-10-05
