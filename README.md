@@ -56,9 +56,22 @@ every `/api` endpoint; hiding a button in the client is not the control.
 | `/api/detect`, `/ask`, `/figure`, `/transcribe` | owner, technician |
 | `POST /api/documents`, `POST /api/admin/users` | administrator      |
 
+In development (`APP_ENV=development`, the default) the stack creates one demo
+account per role on start, all with password `password123`:
+
+| Email                 | Role          |
+| --------------------- | ------------- |
+| `owner@test.com`      | owner         |
+| `technician@test.com` | technician    |
+| `admin@test.com`      | administrator |
+
+The seed refuses to run under any other `APP_ENV`, so these never reach a real
+database.
+
 Sign-in returns a bearer token (HS256 JWT signed with `SECRET_KEY`, valid for
-`ACCESS_TOKEN_TTL_MINUTES`). Passwords are stored as Argon2id hashes. Create the
-first administrator from the command line; they can create the rest over the API:
+`ACCESS_TOKEN_TTL_MINUTES`). Passwords are stored as Argon2id hashes. Outside
+development, create the first administrator from the command line; they can
+create the rest over the API:
 
 ```sh
 docker compose exec backend python -m app.create_user admin@example.com administrator
@@ -85,6 +98,7 @@ backend/               FastAPI service layer (§5)
   app/stores.py        PostgreSQL / Qdrant / S3 clients and probes
   app/users.py         accounts and the three roles (T-402)
   app/security.py      Argon2id hashing, signed tokens, server-side role check
+  app/seed_users.py    demo account per role, development only
   app/contracts.py     the five interface contracts (§5.2, T-202)
   app/routers/api.py   /api/detect, /ask, /figure, /transcribe, /documents
   app/routers/auth.py  /api/auth/login, /register, /me, /api/admin/users
