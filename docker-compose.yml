@@ -116,6 +116,7 @@ services:
     environment:
       APP_ENV: ${APP_ENV:-development}
       SECRET_KEY: ${SECRET_KEY:-change-me-in-production}
+      ACCESS_TOKEN_TTL_MINUTES: ${ACCESS_TOKEN_TTL_MINUTES:-60}
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-repair}:${POSTGRES_PASSWORD:-repair}@postgres:5432/${POSTGRES_DB:-repair}
       QDRANT_URL: http://qdrant:6333
       S3_ENDPOINT: seaweedfs:8333

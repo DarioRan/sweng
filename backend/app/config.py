@@ -3,14 +3,18 @@
 from functools import lru_cache
 from typing import Literal
 
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_DEFAULT_SECRET = "change-me-in-production"
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     app_env: Literal["development", "test", "production"] = "development"
-    secret_key: str = "change-me-in-production"
+    secret_key: str = _DEFAULT_SECRET  # signs session tokens (T-402)
+    access_token_ttl_minutes: int = 60
     cors_origins: str = "http://localhost:5173"
 
     # Storage (§5)
@@ -35,6 +39,14 @@ class Settings(BaseSettings):
     # Thresholds behind Rules 1 and 2 (§1.3). Calibrated under T-502; placeholders until then.
     detector_confidence_threshold: float = 0.6
     retrieval_confidence_threshold: float = 0.5
+
+    @model_validator(mode="after")
+    def _real_secret_in_production(self) -> "Settings":
+        if self.app_env == "production" and (
+            self.secret_key == _DEFAULT_SECRET or len(self.secret_key) < 32
+        ):
+            raise ValueError("SECRET_KEY must be set to 32+ random characters in production")
+        return self
 
     @property
     def cors_origin_list(self) -> list[str]:

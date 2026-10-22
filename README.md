@@ -44,6 +44,26 @@ docker compose exec ollama ollama pull llama3.2:3b   # once
 Then set `LLM_BACKEND=local` in `.env` (or switch at runtime as administrator,
 US-29).
 
+### Accounts and roles
+
+Three roles: `owner`, `technician`, `administrator`. The server checks them on
+every `/api` endpoint; hiding a button in the client is not the control.
+
+| Endpoint                                    | Roles                 |
+| ------------------------------------------- | --------------------- |
+| `POST /api/auth/register`, `/api/auth/login` | anyone (sign-up makes an owner) |
+| `GET /api/auth/me`                          | any signed-in user    |
+| `/api/detect`, `/ask`, `/figure`, `/transcribe` | owner, technician |
+| `POST /api/documents`, `POST /api/admin/users` | administrator      |
+
+Sign-in returns a bearer token (HS256 JWT signed with `SECRET_KEY`, valid for
+`ACCESS_TOKEN_TTL_MINUTES`). Passwords are stored as Argon2id hashes. Create the
+first administrator from the command line; they can create the rest over the API:
+
+```sh
+docker compose exec backend python -m app.create_user admin@example.com administrator
+```
+
 ### Everyday commands
 
 ```sh
@@ -63,10 +83,13 @@ docker-compose.yml     the stack (T-304)
 backend/               FastAPI service layer (§5)
   app/config.py        settings from the environment
   app/stores.py        PostgreSQL / Qdrant / S3 clients and probes
+  app/users.py         accounts and the three roles (T-402)
+  app/security.py      Argon2id hashing, signed tokens, server-side role check
   app/contracts.py     the five interface contracts (§5.2, T-202)
   app/routers/api.py   /api/detect, /ask, /figure, /transcribe, /documents
+  app/routers/auth.py  /api/auth/login, /register, /me, /api/admin/users
   app/vision/          frozen component classes, COCO schema (T-306, ADR 0002)
-  tests/               contract-shape tests, no stores needed
+  tests/               contract-shape and auth tests, no stores needed
 frontend/              phone-first web client (Vite + React)
 infra/postgres/init/   SQL run once on an empty database volume
 ```
