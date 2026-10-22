@@ -56,6 +56,11 @@ every `/api` endpoint; hiding a button in the client is not the control.
 | `/api/detect`, `/ask`, `/figure`, `/transcribe` | owner, technician |
 | `POST /api/documents`, `POST /api/admin/users` | administrator      |
 
+To work without signing in, set `AUTH_DISABLED=true` in `.env` and restart the
+backend. Requests without a token then pass every role check; requests with a
+token are still checked, so roles can still be tested. Development only: the
+backend refuses to start with it under any other `APP_ENV`.
+
 In development (`APP_ENV=development`, the default) the stack creates one demo
 account per role on start, all with password `password123`:
 

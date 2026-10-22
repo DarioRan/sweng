@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     app_env: Literal["development", "test", "production"] = "development"
     secret_key: str = _DEFAULT_SECRET  # signs session tokens (T-402)
     access_token_ttl_minutes: int = 60
+    # Development only: requests without a token pass every role check (see security.py).
+    auth_disabled: bool = False
     cors_origins: str = "http://localhost:5173"
 
     # Storage (§5)
@@ -46,6 +48,8 @@ class Settings(BaseSettings):
             self.secret_key == _DEFAULT_SECRET or len(self.secret_key) < 32
         ):
             raise ValueError("SECRET_KEY must be set to 32+ random characters in production")
+        if self.auth_disabled and self.app_env != "development":
+            raise ValueError("AUTH_DISABLED is only allowed with APP_ENV=development")
         return self
 
     @property

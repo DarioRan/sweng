@@ -1,5 +1,6 @@
 """FastAPI entry point — the single service-layer process from §5."""
 
+import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -18,6 +19,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
     app.state.stores = Stores.from_settings(settings)
     app.state.users = SqlUserStore(app.state.stores.db)
+    if settings.auth_disabled:
+        logging.getLogger("uvicorn.error").warning(
+            "AUTH_DISABLED=true: requests without a token pass every role check"
+        )
     try:
         yield
     finally:

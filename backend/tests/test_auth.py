@@ -1,13 +1,15 @@
 """T-402: sign-in issues a signed token, three roles, every endpoint checks the role server-side."""
 
-from collections.abc import Callable
+from collections.abc import Callable, Iterator
 from datetime import UTC, datetime, timedelta
 
 import jwt
 import pytest
 from fastapi.testclient import TestClient
+from pydantic import ValidationError
 
-from app.config import get_settings
+from app.config import Settings, get_settings
+from app.main import app
 from app.security import hash_password, verify_password
 from app.users import InMemoryUserStore, Role
 from tests.conftest import PASSWORD
@@ -198,3 +200,40 @@ def test_administrator_creates_a_technician(client: TestClient, auth_header: Aut
     assert response.status_code == 201
     login = client.post("/api/auth/login", json={"email": "tech@example.com", "password": PASSWORD})
     assert login.json()["role"] == "technician"
+
+
+# ------------------------------------------------------------- development bypass
+
+
+@pytest.fixture
+def auth_disabled() -> Iterator[None]:
+    settings = get_settings().model_copy(update={"auth_disabled": True})
+    app.dependency_overrides[get_settings] = lambda: settings
+    yield
+    app.dependency_overrides.pop(get_settings, None)
+
+
+def test_bypass_is_off_by_default() -> None:
+    assert Settings().auth_disabled is False
+
+
+@pytest.mark.parametrize("env", ["test", "production"])
+def test_bypass_refused_outside_development(env: str) -> None:
+    with pytest.raises(ValidationError, match="AUTH_DISABLED"):
+        Settings(app_env=env, auth_disabled=True, secret_key="s" * 48)
+
+
+def test_bypass_lets_tokenless_requests_through_every_role(
+    client: TestClient, auth_disabled: None
+) -> None:
+    assert client.post("/api/ask", json=ASK).status_code == 501
+    assert client.post("/api/documents", **DOCUMENT).status_code == 501
+
+
+def test_bypass_still_checks_requests_with_a_token(
+    client: TestClient, auth_header: AuthHeader, auth_disabled: None
+) -> None:
+    owner = auth_header(Role.owner)
+    assert client.post("/api/documents", headers=owner, **DOCUMENT).status_code == 403
+    bad = {"Authorization": "Bearer not-a-token"}
+    assert client.post("/api/ask", headers=bad, json=ASK).status_code == 401

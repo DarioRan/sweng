@@ -5,6 +5,9 @@ Tokens:    HS256 JWT signed with SECRET_KEY; `sub` is the user id.
 Roles:     every protected route declares `Depends(require_roles(...))`. The role is
            read from the user record on each request, not trusted from the token,
            so a role change or a deleted account takes effect immediately.
+Bypass:    AUTH_DISABLED=true (development only, enforced in config.py) lets requests
+           without a token through as DEV_USER, who passes every role check.
+           Requests that do carry a token are still checked normally.
 """
 
 from collections.abc import Awaitable, Callable
@@ -82,6 +85,13 @@ def get_user_store(request: Request) -> UserStore:
 
 _bearer = HTTPBearer(auto_error=False)
 
+DEV_USER = User(
+    id="00000000-0000-0000-0000-000000000000",
+    email="dev@localhost",
+    password_hash="",  # matches no password, so DEV_USER cannot sign in
+    role=Role.administrator,
+)
+
 _UNAUTHENTICATED = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
     detail="Not signed in.",
@@ -95,6 +105,8 @@ async def current_user(
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> User:
     if credentials is None:
+        if settings.auth_disabled:
+            return DEV_USER
         raise _UNAUTHENTICATED
     user_id = decode_token(credentials.credentials, settings)
     user = await store.get_by_id(user_id) if user_id else None
@@ -108,7 +120,7 @@ def require_roles(*roles: Role) -> Callable[..., Awaitable[User]]:
     allowed = frozenset(roles)
 
     async def check(user: Annotated[User, Depends(current_user)]) -> User:
-        if user.role not in allowed:
+        if user.role not in allowed and user is not DEV_USER:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=f"Requires role: {', '.join(sorted(allowed))}.",
