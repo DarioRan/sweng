@@ -2,10 +2,10 @@
 
 Reads one bike's raw photos, sorted into one folder per class, and writes
 resized copies with all metadata removed (including GPS location) to
-images/<bike>/, plus one row per photo in captures.csv.
+images/<bike>/<class>/, plus one row per photo in captures.csv.
 
     data/raw/b01/rear_derailleur/IMG_0001.jpg ...  (raw, git-ignored)
-    -> datasets/components/images/b01/b01_rear_derailleur_001.jpg
+    -> datasets/components/images/b01/rear_derailleur/b01_rear_derailleur_001.jpg
 
 Usage, from the repository root:
 
@@ -91,22 +91,23 @@ def main() -> None:
         parser.error(f"not a class in categories.json: {', '.join(unknown)}")
 
     out_dir = HERE / "images" / args.bike
-    out_dir.mkdir(parents=True, exist_ok=True)
     new_file = not CSV_PATH.exists()
     rows, skipped = [], 0
 
     for folder in folders:
         photos = sorted(p for p in folder.iterdir() if p.suffix.lower() in SUFFIXES)
+        if photos:
+            (out_dir / folder.name).mkdir(parents=True, exist_ok=True)
         for shot, src in enumerate(photos, start=1):
             name = f"{args.bike}_{folder.name}_{shot:03d}.jpg"
-            dst = out_dir / name
+            dst = out_dir / folder.name / name
             if dst.exists():
                 skipped += 1
                 continue
             device, taken = prepare(src, dst)
             angle, distance, occlusion, light = RECIPE.get(shot, ("", "", "", ""))
             rows.append({
-                "file_name": f"images/{args.bike}/{name}", "bike": args.bike,
+                "file_name": f"images/{args.bike}/{folder.name}/{name}", "bike": args.bike,
                 "split": args.split, "main_class": folder.name, "shot": shot,
                 "angle": angle, "distance": distance, "occlusion": occlusion,
                 "light": light, "device": device, "taken_at": taken,

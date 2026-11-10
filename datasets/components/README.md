@@ -13,7 +13,7 @@ Our own photos of the 11 component classes in [ADR 0002](../../docs/adr/0002-com
 ```
 data/raw/<bike>/<class>/*.jpg          raw phone photos — git-ignored, stay on your machine
 datasets/components/
-  images/<bike>/<bike>_<class>_NNN.jpg  prepared photos: max 1600 px, no metadata
+  images/<bike>/<class>/<bike>_<class>_NNN.jpg   prepared photos: max 1600 px, no metadata
   captures.csv                          one row per photo (written by the script)
   prepare_photos.py                     raw -> prepared
 ```
@@ -60,5 +60,7 @@ Phone settings: normal photo mode, no portrait/blur, no filters, no zoom. On an 
 
 3. Check a few prepared photos, fill in the bike's row in the table above, then commit `images/<bike>/` and `captures.csv` on a branch and open a PR.
 4. Post the count per class on #15.
+
+To create the empty raw folders for a new bike: `python3 -c "import json,pathlib; [pathlib.Path('data/raw/b05',c['name']).mkdir(parents=True,exist_ok=True) for c in json.load(open('backend/app/vision/categories.json'))['categories']]"`
 
 Videos (15-second sweeps around a part) stay in `data/raw/` for now; frames are extracted later and prepared the same way.
