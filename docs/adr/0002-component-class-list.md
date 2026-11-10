@@ -45,7 +45,7 @@ Every code above is the code on a dealer's manual published at si.shimano.com, m
 
 ### Example photos
 
-One example photo per class comes from our own first capture session (T-309), stored with the captures, not in Git (§1.4, `data/` is ignored). Photos from the web are not used, as their licences are unrecorded. The column above is updated with the capture id of each example when the session is done.
+One example photo per class comes from our own first capture session (T-309), from the prepared set in [`datasets/components/`](../../datasets/components/README.md). Raw phone photos stay out of Git (`data/` is ignored) because they carry GPS metadata. Photos from the web are not used, as their licences are unrecorded. The column above is updated with the capture id of each example when the session is done.
 
 ## Confusable pairs
 

@@ -18,8 +18,9 @@ node_modules/
 frontend/dist/
 *.local
 
-# Model weights, corpora and captured data — never committed (§1.4: no
-# redistribution of any manufacturer corpus)
+# Model weights, corpora and raw captures — never committed (§1.4: no
+# redistribution of any manufacturer corpus; raw phone photos carry GPS
+# metadata). Prepared photos go in datasets/components/ (see its README).
 models/
 data/
 *.pt
