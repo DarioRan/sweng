@@ -1,0 +1,13 @@
+file_name,bike,split,main_class,shot,angle,distance,occlusion,light,device,taken_at,source_file,notes
+images/b03/pedal/b03_pedal_001.jpg,b03,test,pedal,1,side,close,none,normal,Google Pixel 8,2026:11:08 16:18:01,PXL_20261108_151801250.jpg,
+images/b03/pedal/b03_pedal_002.jpg,b03,test,pedal,2,side,far,none,normal,Google Pixel 8,2026:11:08 16:18:02,PXL_20261108_151802557.jpg,
+images/b03/pedal/b03_pedal_003.jpg,b03,test,pedal,3,front,close,none,normal,Google Pixel 8,2026:11:08 16:18:04,PXL_20261108_151804734.jpg,
+images/b03/pedal/b03_pedal_004.jpg,b03,test,pedal,4,back,close,none,normal,Google Pixel 8,2026:11:08 16:18:11,PXL_20261108_151811171.jpg,
+images/b03/pedal/b03_pedal_005.jpg,b03,test,pedal,5,above,close,none,normal,Google Pixel 8,2026:11:08 16:18:12,PXL_20261108_151812964.jpg,
+images/b03/pedal/b03_pedal_006.jpg,b03,test,pedal,6,below,close,none,normal,Google Pixel 8,2026:11:08 16:18:14,PXL_20261108_151814813.jpg,
+images/b03/shift_brake_lever/b03_shift_brake_lever_001.jpg,b03,test,shift_brake_lever,1,side,close,none,normal,Google Pixel 8,2026:11:08 16:18:36,PXL_20261108_151836542.jpg,
+images/b03/shift_brake_lever/b03_shift_brake_lever_002.jpg,b03,test,shift_brake_lever,2,side,far,none,normal,Google Pixel 8,2026:11:08 16:18:43,PXL_20261108_151843264.jpg,
+images/b03/shift_brake_lever/b03_shift_brake_lever_003.jpg,b03,test,shift_brake_lever,3,front,close,none,normal,Google Pixel 8,2026:11:08 16:18:48,PXL_20261108_151848778.jpg,
+images/b03/shift_brake_lever/b03_shift_brake_lever_004.jpg,b03,test,shift_brake_lever,4,back,close,none,normal,Google Pixel 8,2026:11:08 16:18:51,PXL_20261108_151851942.MP.jpg,
+images/b03/shift_brake_lever/b03_shift_brake_lever_005.jpg,b03,test,shift_brake_lever,5,above,close,none,normal,Google Pixel 8,2026:11:08 16:18:58,PXL_20261108_151858900.jpg,
+images/b03/shift_brake_lever/b03_shift_brake_lever_006.jpg,b03,test,shift_brake_lever,6,below,close,none,normal,Google Pixel 8,2026:11:08 16:19:01,PXL_20261108_151901230.jpg,
