@@ -22,9 +22,9 @@ Bike ids are `b01`, `b02`, … in the order bikes are photographed. **Whole bike
 
 | Bike | Type | Split | Notes |
 |---|---|---|---|
-| b01 | | train | |
+| b01 | City bike, chain guard, hub gear, rim brakes | train | |
 | b02 | | train | |
-| b03 | | train | |
+| b03 | TBM city e-bike (Bordeaux shared bike) | train | Photos are marked `test` in captures.csv: to agree |
 | b04 | | test | |
 
 ### Choosing the bikes
