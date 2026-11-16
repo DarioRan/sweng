@@ -23,7 +23,7 @@ Bike ids are `b01`, `b02`, … in the order bikes are photographed. **Whole bike
 | Bike | Type | Split | Notes |
 |---|---|---|---|
 | b01 | City bike, chain guard, hub gear, rim brakes | train | |
-| b02 | | train | |
+| b02 | Full-suspension MTB, 3×7 speed, V-brakes | train | V-brakes not photographed as `rim_brake_caliper` (ADR 0002) |
 | b03 | TBM city e-bike (Bordeaux shared bike) | train | |
 | b04 | | test | |
 
