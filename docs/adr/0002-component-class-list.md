@@ -6,7 +6,7 @@
 - **Issue:** #11 (T-306, Sprint 1, Vision, P1)
 - **Blocks:** photo capture (T-309), dataset check, annotation (T-310)
 - **Related:** ADR 0001 (public bicycle datasets), whose open item 2 this resolves
-- **Amended:** 2026-11-16 — class 12 `v_brake` added (see Amendment 1)
+- **Amended:** 2026-11-16 — class 12 `v_brake` added (see Amendment 1); `cassette`, `bottom_bracket` and `shift_brake_lever` boxes made precise at annotation (see Amendment 2)
 
 ---
 
@@ -28,12 +28,12 @@ Twelve classes: eleven frozen on 2026-10-05, and `v_brake` added by Amendment 1.
 |---|---|---|---|---|
 | 1 | `rear_derailleur` | The cage-and-pulley mechanism hung from the rear dropout that moves the chain across the cassette. Box includes the cage and both pulleys. | DM-RD0001 (MTB), DM-MARD001 | to capture (T-309) |
 | 2 | `front_derailleur` | The cage on the seat tube, above the chainrings, that moves the chain between chainrings. | DM-FD0003, DM-FD0001 (MTB) | to capture (T-309) |
-| 3 | `cassette` | The stack of sprockets on the rear hub. | DM-RACS001 (road), DM-MACS001 (MTB) | to capture (T-309) |
+| 3 | `cassette` | The sprockets on the rear hub: a stack, or the single sprocket of a hub-gear or single-speed bike (Amendment 2). | DM-RACS001 (road), DM-MACS001 (MTB) | to capture (T-309) |
 | 4 | `chain` | The roller chain. One box per visible run; a run broken by occlusion gets one box per segment. | DM-CN0001 | to capture (T-309) |
 | 5 | `crankset` | Crank arms together with the chainrings and spider. Excludes the pedals. | DM-MBFC001, DM-MDFC001 | to capture (T-309) |
-| 6 | `bottom_bracket` | The bearing cups visible at the frame's bottom-bracket shell, between the crank arms. | DM-MBFC001, DM-MDFC001 | to capture (T-309) |
+| 6 | `bottom_bracket` | The bearing cups at the frame's bottom-bracket shell, or, where the crank hides them, the centre of the crank where the axle comes through: crank bolt and axle end (Amendment 2). | DM-MBFC001, DM-MDFC001 | to capture (T-309) |
 | 7 | `pedal` | A pedal body, flat or clipless, on its crank arm. | DM-PD0002 (road), DM-MAPD001 (MTB) | to capture (T-309) |
-| 8 | `shift_brake_lever` | A handlebar control that brakes, shifts, or both: a road dual control lever, an MTB brake lever, or a trigger shifter. | DM-RACBR01, DM-RADBR01, DM-MADBR01 | to capture (T-309) |
+| 8 | `shift_brake_lever` | A handlebar control that brakes, shifts, or both: a road dual control lever, an MTB brake lever, a trigger shifter, or a grip shifter. A grip shifter next to a brake lever is one box with it (Amendment 2). | DM-RACBR01, DM-RADBR01, DM-MADBR01 | to capture (T-309) |
 | 9 | `disc_brake_caliper` | The caliper on the fork or frame mount that grips the rotor. | DM-RADBR01 (road), DM-MADBR01 (MTB) | to capture (T-309) |
 | 10 | `disc_rotor` | The metal disc bolted to the hub that the caliper grips. | DM-MADBR01, DM-RADBR01 | to capture (T-309) |
 | 11 | `rim_brake_caliper` | A dual-pivot caliper rim brake, held by a single bolt at the fork crown or seatstay bridge. V-brakes are class 12; cantilevers are out of scope. | DM-RACBR01 | to capture (T-309) |
@@ -60,7 +60,7 @@ Flagged now so the confusion matrix reports them by name from the first trained 
 | `disc_rotor` ↔ `crankset` | A drilled rotor and a chainring are both flat, perforated discs. |
 | `disc_brake_caliper` ↔ `rim_brake_caliper` | Both are a compact brake body near the wheel. |
 | `v_brake` ↔ `rim_brake_caliper` | Both are rim brakes with metal arms and pads either side of the rim; seen from the side, the pivots that tell them apart can be hidden. |
-| `bottom_bracket` ↔ `crankset` | The bottom bracket is mostly hidden behind the crank arm; the boxes overlap heavily. |
+| `bottom_bracket` ↔ `crankset` | The bottom bracket is mostly hidden behind the crank arm; the boxes overlap heavily, and since Amendment 2 the crank bolt is `bottom_bracket` while the arm around it is `crankset`. |
 
 ## Overlap with DelftBikes
 
@@ -104,11 +104,24 @@ Two of our twelve classes get labels straight from DelftBikes, three might, and 
 
 **Consequences.** DM-GN0001 (revision 30) is added to the corpus record, `docs/corpus/provenance.csv`, with `v_brake` in its `components` column; DM-TORQUE's row lists `v_brake` too. The corpus ingestion (T-203b) indexes it with the others. The capture plan adds `v_brake` and its look-alike pair.
 
+## Amendment 2 — three box definitions made precise (2026-11-16)
+
+**Context.** Annotating the first 135 photos (T-310) met three cases the definitions above did not settle: the single rear sprocket of b01's hub gear, side views of the crank where the bearing cups are hidden, and a grip shifter mounted against a brake lever (b02, b03).
+
+**Decision.**
+
+- `cassette` includes a single sprocket. The app should find the rear sprocket on hub-gear and single-speed bikes too, and the cassette manuals are the nearest answer for them.
+- `bottom_bracket` is the bearing cups where they are visible and, where the crank hides them, the centre of the crank: crank bolt and axle end. This is where a user points when asking about the bottom bracket in a side photo. The cost is a larger overlap with `crankset`, which the confusion matrix already reports by name.
+- A grip shifter next to a brake lever is one `shift_brake_lever` box around both, because the two are mounted as one unit.
+
+**Relabelling.** None for ids: all twelve are unchanged. The first annotations follow these rules; the five photos that did not (b01_cassette_003 and 004, b02_shift_brake_lever_001, 002 and 004) were corrected at import.
+
 ## Open items before this ADR moves to Accepted
 
 - [ ] Manual codes opened and confirmed in a browser, one per class
 - [x] V-brake dealer's manual code found and entered for class 12 (Amendment 1): DM-GN0001
 - [ ] Example photo recorded for each class after the first capture session
+- [ ] Amendment 2 confirmed by every decider
 - [ ] PR approved by every decider
 
 ## References

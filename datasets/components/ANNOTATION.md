@@ -19,12 +19,14 @@ For training, `annotations.py merge data/annotations_all.json` joins the bike fi
 ## Setting up (once, about 10 minutes)
 
 1. Install the tools: `pip install label-studio pillow`
-2. Start Label Studio: `label-studio start`. It opens at <http://localhost:8080>. The account you create stays on your machine.
+2. Start Label Studio: `DATA_UPLOAD_MAX_NUMBER_FILES=1000 label-studio start`. It opens at <http://localhost:8080>. The account you create stays on your machine. Without the variable, an import of more than 100 photos fails with a server error.
 3. Write the label config: `python3 datasets/components/annotations.py setup --list datasets/components/annotations/calibration.txt`. This also copies the calibration photos into `data/labelstudio/calibration/`.
 4. In Label Studio, create a project for each batch (for example "calibration", "b01"). Under **Labeling Setup → Custom template → Code**, paste the contents of `data/labelstudio/label_config.xml`. Never type the labels by hand: the config is generated from `categories.json`, so the names always match.
 5. **Data Import**: drag in the photos from `data/labelstudio/<batch>/`.
 
-When a batch is done: **Export → COCO**, unzip, and import `result.json` as in the steps below. Only photos you have **submitted** are exported.
+**makesense.ai works too**, in the browser with nothing to install: choose Object Detection, load the label list that `setup` writes to `data/labelstudio/labels.txt`, and export **Actions → Export Annotations → Single CSV file**. It saves nothing: export every 20–30 photos, or a closed tab loses the work.
+
+When a batch is done in Label Studio, click **Export** in the project and pick **COCO** (unzip it and use `result.json`) or **JSON**. `import` reads either. Label Studio also keeps a copy of every export in its data folder, under `export/`. Only photos you have **submitted** are exported.
 
 ## The process
 
@@ -51,12 +53,12 @@ Compare each pair. Swap the files you have so every pair is covered. `agree` lis
 
 ### 3. Annotation, one bike at a time
 
-Nobody annotates a bike they photographed: a fresh eye catches what the photographer took for granted.
+Nobody annotates a bike they photographed: a fresh eye catches what the photographer took for granted. (The first pass of b01–b07 was done by one person, Narmeen, to unblock the detector; review, step 5, is therefore by someone else.)
 
 ```sh
 python3 datasets/components/annotations.py setup --bike b01        # photos -> data/labelstudio/b01/
 # label them in a Label Studio project "b01", export COCO, unzip
-python3 datasets/components/annotations.py import result.json --annotator narmeen
+python3 datasets/components/annotations.py import result.json --annotator narmeen   # several exports can be given at once
 python3 datasets/components/annotations.py overlay --bike b01      # review sheets -> data/review/
 python3 datasets/components/annotations.py check
 ```
@@ -121,12 +123,12 @@ Run `python3 datasets/components/annotations.py dupes` before fixing the split: 
 |---|---|---|
 | `rear_derailleur` | Cage, both pulley wheels, body up to its mount on the hanger | Cable, cassette, chain |
 | `front_derailleur` | Cage, body and its clamp or mount on the seat tube | Cable, chainrings |
-| `cassette` | All the visible sprockets on the rear hub | Hub shell, spokes, derailleur |
+| `cassette` | All the visible sprockets on the rear hub; a single sprocket counts | Hub shell, spokes, the plastic spoke protector, derailleur |
 | `chain` | One box per visible run between sprockets and chainrings; split where a tube or chain guard hides it | The chain on the teeth beyond where the run meets them |
 | `crankset` | Crank arm, chainrings and spider together. The other side's arm, if visible, is its own box | Pedal, chain guard |
-| `bottom_bracket` | The visible bearing cup or shell where the axle enters the frame. It may sit inside the crankset box | The crank bolt or crank arm |
+| `bottom_bracket` | The bearing cup where the axle enters the frame. Where the crank hides it, the centre of the crank: crank bolt and axle end. It sits inside the crankset box | The crank arm or spider around it |
 | `pedal` | Pedal body, including reflectors and the axle stub | Crank arm |
-| `shift_brake_lever` | One box per separate control on the bar: brake lever blade and body, trigger or grip shifter. A road dual-control lever is one box | Grip, cable, bell |
+| `shift_brake_lever` | Brake lever blade and body, trigger or grip shifter. A grip shifter next to a brake lever is one box with it; a road dual-control lever is one box | The fixed grip, cable, bell |
 | `disc_brake_caliper` | Caliper body and its mount adapter | Rotor, hose |
 | `disc_rotor` | The visible disc, also seen through the spokes | Hub, caliper |
 | `rim_brake_caliper` | Both arms, centre bolt and pads of a dual-pivot caliper | Cable |
@@ -142,7 +144,7 @@ These are reported by name in the confusion matrix (ADR 0002). When unsure betwe
 | `cassette` ↔ `crankset` | Cassette is on the rear hub, with spokes around it; crankset has an arm and sits at the bottom bracket |
 | `disc_rotor` ↔ `crankset` | Rotor is thin, flat, without teeth, at a hub; chainrings have teeth and a chain |
 | `disc_brake_caliper` ↔ `rim_brake_caliper` | Disc caliper grips a rotor at the hub; rim caliper grips the rim at the fork crown |
-| `bottom_bracket` ↔ `crankset` | Only the cup at the frame is `bottom_bracket`; everything that turns is `crankset` |
+| `bottom_bracket` ↔ `crankset` | The cup at the frame, or the crank bolt at the centre, is `bottom_bracket`; the arm, spider and chainrings around it are `crankset` |
 | `v_brake` ↔ `rim_brake_caliper` | V-brake: two arms on separate pivots on the fork legs, a noodle on top; caliper: one centre bolt above the tyre |
 
 ## Decisions
@@ -151,5 +153,9 @@ Settled at calibration or later. Each one is a rule from now on, and earlier ann
 
 | Date | Question | Decision |
 |---|---|---|
-| | Single sprocket on a hub gear (`b01_cassette_001`): `cassette`? | To settle at calibration. ADR 0002 defines a cassette as a stack of sprockets |
-| | Grip shifter next to a brake lever (`b02_shift_brake_lever_004`): one box or two? | Proposed above: two, one per separate control. To confirm |
+| 2026-11-16 | Single sprocket on a hub gear (`b01_cassette_001`): `cassette`? | Yes, box it as `cassette` (ADR 0002, Amendment 2) |
+| 2026-11-16 | Grip shifter next to a brake lever (`b02_shift_brake_lever_004`): one box or two? | One `shift_brake_lever` box around both (Amendment 2) |
+| 2026-11-16 | Side view of the crank, bearing cup hidden: `bottom_bracket`? | Yes, on the crank bolt and axle end (Amendment 2) |
+| 2026-11-16 | Spoke protector behind the cassette (b04, b05): in the box? | No, sprockets only |
+
+Proposed by Narmeen at the first annotation pass; the team confirms them on the PR, as for ADR amendments.
