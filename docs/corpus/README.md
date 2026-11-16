@@ -1,6 +1,6 @@
 # Shimano manual corpus (T-203)
 
-The 27 Shimano dealer's manuals the assistant answers from. One row per manual in `provenance.csv`: source link, licence basis and retrieval date (Rule 4, US-24).
+The 28 Shimano dealer's manuals the assistant answers from. One row per manual in `provenance.csv`: source link, licence basis and retrieval date (Rule 4, US-24).
 
 ## How to get the PDFs
 
@@ -126,6 +126,7 @@ Every class in `backend/app/vision/categories.json` (ADR 0002) is covered by at 
 
 - Every code in ADR 0002 is included. Two of them are 11-speed manuals (DM-RACS001 for road cassettes, DM-CN0001 for chains), kept because many bikes still run 11-speed. DM-MACS001 covers the 12-speed MTB cassettes CS-M9100, CS-M8100, CS-M7100 and CS-M6100. Further manuals were added for newer 12-speed parts (DM-MACS010, DM-MACN001, DM-RARD010) and for 7 to 9-speed cassettes on entry-level bikes (DM-RBCS001).
 - The chain class is covered by DM-CN0001 (11-speed), DM-MACN001 (12-speed) and DM-CN0002 (CN-LG500 LINKGLIDE and SM-CN900-11).
+- `v_brake` (class 12, ADR 0002 Amendment 1) is covered by DM-GN0001 (General Operations), whose V-BRAKE installation section was checked in a browser on 2026-11-16. Shimano publishes no V-brake-only dealer's manual. Only `v_brake` is listed in its `components` column, since its other sections were not reviewed.
 - Road rotors are coded SM-RT (for example SM-RT800 in DM-RADBR01), MTB rotors RT-MT (in DM-MADBR01).
 - DM-TORQUE-04 is a torque chart across all series. It supports specification-first answers (US-14).
 - Every `source_url` names the exact revision (`DM-<code>-<revision>-ENG.pdf`), so the link and the `revision` column always point to the same file.
