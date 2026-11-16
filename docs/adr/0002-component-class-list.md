@@ -6,6 +6,7 @@
 - **Issue:** #11 (T-306, Sprint 1, Vision, P1)
 - **Blocks:** photo capture (T-309), dataset check, annotation (T-310)
 - **Related:** ADR 0001 (public bicycle datasets), whose open item 2 this resolves
+- **Amended:** 2026-11-16 — class 12 `v_brake` added (see Amendment 1)
 
 ---
 
@@ -21,7 +22,7 @@ A class is admitted only if it is:
 
 ## Decision
 
-Eleven classes. The machine-readable schema is [`backend/app/vision/categories.json`](../../backend/app/vision/categories.json) (COCO `categories` block); this table is its human definition. Ids are fixed: annotations and trained weights refer to them.
+Twelve classes: eleven frozen on 2026-10-05, and `v_brake` added by Amendment 1. The machine-readable schema is [`backend/app/vision/categories.json`](../../backend/app/vision/categories.json) (COCO `categories` block); this table is its human definition. Ids are fixed: annotations and trained weights refer to them.
 
 | Id | Name | Definition — what gets a box | Shimano dealer's manuals | Example photo |
 |---|---|---|---|---|
@@ -35,9 +36,10 @@ Eleven classes. The machine-readable schema is [`backend/app/vision/categories.j
 | 8 | `shift_brake_lever` | A handlebar control that brakes, shifts, or both: a road dual control lever, an MTB brake lever, or a trigger shifter. | DM-RACBR01, DM-RADBR01, DM-MADBR01 | to capture (T-309) |
 | 9 | `disc_brake_caliper` | The caliper on the fork or frame mount that grips the rotor. | DM-RADBR01 (road), DM-MADBR01 (MTB) | to capture (T-309) |
 | 10 | `disc_rotor` | The metal disc bolted to the hub that the caliper grips. | DM-MADBR01, DM-RADBR01 | to capture (T-309) |
-| 11 | `rim_brake_caliper` | A dual-pivot caliper rim brake at the fork crown or seatstay bridge. V-brakes and cantilevers are out of scope. | DM-RACBR01 | to capture (T-309) |
+| 11 | `rim_brake_caliper` | A dual-pivot caliper rim brake, held by a single bolt at the fork crown or seatstay bridge. V-brakes are class 12; cantilevers are out of scope. | DM-RACBR01 | to capture (T-309) |
+| 12 | `v_brake` | A linear-pull (V-) rim brake: two tall arms, each pivoting on its own boss on the fork legs or seatstays, joined at the top by the cable and its curved guide tube ("noodle"). Box covers both arms and the noodle. | DM-GN0001 (General Operations: V-BRAKE installation section) | to capture (T-309) |
 
-Supercategories: `drivetrain` (1–7), `control` (8), `brake` (9–11).
+Supercategories: `drivetrain` (1–7), `control` (8), `brake` (9–12).
 
 ### Manual mapping: how it was checked
 
@@ -45,7 +47,7 @@ Every code above is the code on a dealer's manual published at si.shimano.com, m
 
 ### Example photos
 
-One example photo per class comes from our own first capture session (T-309), stored with the captures, not in Git (§1.4, `data/` is ignored). Photos from the web are not used, as their licences are unrecorded. The column above is updated with the capture id of each example when the session is done.
+One example photo per class comes from our own first capture session (T-309), from the prepared set in [`datasets/components/`](../../datasets/components/README.md). Raw phone photos stay out of Git (`data/` is ignored) because they carry GPS metadata. Photos from the web are not used, as their licences are unrecorded. The column above is updated with the capture id of each example when the session is done.
 
 ## Confusable pairs
 
@@ -57,11 +59,12 @@ Flagged now so the confusion matrix reports them by name from the first trained 
 | `cassette` ↔ `crankset` | Both are concentric toothed rings. |
 | `disc_rotor` ↔ `crankset` | A drilled rotor and a chainring are both flat, perforated discs. |
 | `disc_brake_caliper` ↔ `rim_brake_caliper` | Both are a compact brake body near the wheel. |
+| `v_brake` ↔ `rim_brake_caliper` | Both are rim brakes with metal arms and pads either side of the rim; seen from the side, the pivots that tell them apart can be hidden. |
 | `bottom_bracket` ↔ `crankset` | The bottom bracket is mostly hidden behind the crank arm; the boxes overlap heavily. |
 
 ## Overlap with DelftBikes
 
-Resolves ADR 0001 open item 2. DelftBikes' 22 classes against our 11:
+Resolves ADR 0001 open item 2. DelftBikes' 22 classes against our 12:
 
 | Our class | DelftBikes class | Match |
 |---|---|---|
@@ -69,16 +72,17 @@ Resolves ADR 0001 open item 2. DelftBikes' 22 classes against our 11:
 | `pedal` | front pedal, back pedal | **Direct**, after merging the two |
 | `shift_brake_lever` | front hand brake, back hand brake | **Possible** — depends on whether those boxes cover the lever or the brake on the wheel. Settled when the annotation format is inspected (ADR 0001 open item 4) |
 | `rim_brake_caliper` | front hand brake, back hand brake | **Possible**, as above |
+| `v_brake` | front hand brake, back hand brake | **Possible**, as above. Dutch city bikes often have V-brakes |
 | `crankset` | — | None. DelftBikes' *gear case* is the enclosed chain guard of a Dutch city bike, not a sprocket; it hides the crankset and chain rather than labelling them |
 | `rear_derailleur`, `front_derailleur`, `cassette`, `bottom_bracket`, `disc_brake_caliper`, `disc_rotor` | — | None |
 
-Two of our eleven classes get labels straight from DelftBikes, two might, and seven get none. DelftBikes stays a source of pretrained features, as ADR 0001 decided. It is not a source of our labels. Whether to fine-tune the shared classes on its boxes is a question for T-201.
+Two of our twelve classes get labels straight from DelftBikes, three might, and seven get none. DelftBikes stays a source of pretrained features, as ADR 0001 decided. It is not a source of our labels. Whether to fine-tune the shared classes on its boxes is a question for T-201.
 
 ## Options considered
 
 - **The ten candidate classes in #11, unchanged.** Rejected only to add `pedal`: it is covered by its own dealer's manuals, is a frequent repair question, and is one of the two classes that match DelftBikes directly.
 - **Split `shift_brake_lever` into shifter and brake lever.** Rejected: on road bikes both are one part (a dual control lever), so the split would be undefined for half the bikes. Revisit if the detector confuses MTB brake levers with trigger shifters and the answers need to differ.
-- **Include V-brakes and cantilevers in `rim_brake_caliper`.** Rejected: they look different from a dual-pivot caliper and are covered by other manuals. Adding them later is a new class, not a change to this one.
+- **Include V-brakes and cantilevers in `rim_brake_caliper`.** Rejected: they look different from a dual-pivot caliper and are covered by other manuals. Adding them later is a new class, not a change to this one. V-brakes were added as their own class by Amendment 1.
 - **Chainring as its own class.** Rejected: on a photograph it is not separable from the crank arm it is bolted to, and the manuals document it with the crankset.
 
 ## Consequences
@@ -88,9 +92,22 @@ Two of our eleven classes get labels straight from DelftBikes, two might, and se
 - The capture plan (T-309) covers every class, from several angles (ADR 0001 criterion 3), with extra images for each side of a confusable pair.
 - The corpus ingestion (T-203b) indexes the manuals in the table above first.
 
+## Amendment 1 — class 12 `v_brake` (2026-11-16)
+
+**Context.** The first capture session (T-309) found V-brakes on both bikes photographed with rim brakes, a city bike (b01) and an MTB (b02), and no dual-pivot caliper. V-brakes are common on the city, hybrid and older mountain bikes our users ride, so a detector without the class would either miss them or call them `rim_brake_caliper` — the second would answer from the wrong manual.
+
+**Decision.** Add `v_brake` as id 12, supercategory `brake`, with the definition in the table above. Ids 1–11 are unchanged. Cantilever brakes stay out of scope.
+
+**Against the admission criteria.** (1) A brake component: yes. (2) Visually distinct from a dual-pivot caliper by its two separate pivots and the cable noodle, but flagged as a confusable pair with `rim_brake_caliper`. (3) Covered by a Shimano dealer's manual: yes, DM-GN0001 (General Operations), whose V-BRAKE installation section was opened and confirmed in a browser on 2026-11-16. Shimano publishes no V-brake-only dealer's manual: the BR-T4000 and BR-T610 calipers have a user's manual (UM-8W20A) only, and DM-RCBR001 covers cantilever brakes, which stay out of scope.
+
+**Relabelling.** None needed: annotation (T-310) has not started. Six photos of b01 that had been sorted into `rim_brake_caliper` are moved to `v_brake`, since they show V-brakes.
+
+**Consequences.** DM-GN0001 (revision 30) is added to the corpus record, `docs/corpus/provenance.csv`, with `v_brake` in its `components` column; DM-TORQUE's row lists `v_brake` too. The corpus ingestion (T-203b) indexes it with the others. The capture plan adds `v_brake` and its look-alike pair.
+
 ## Open items before this ADR moves to Accepted
 
 - [ ] Manual codes opened and confirmed in a browser, one per class
+- [x] V-brake dealer's manual code found and entered for class 12 (Amendment 1): DM-GN0001
 - [ ] Example photo recorded for each class after the first capture session
 - [ ] PR approved by every decider
 
