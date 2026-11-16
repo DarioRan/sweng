@@ -89,7 +89,7 @@ Film a slow 15-second circle around four parts: `rear_derailleur`, `crankset`, `
 
 ## Taking the photos
 
-For each class on each bike, take these 10 shots **in this order**. The script reads the shot number to fill in angle, distance, occlusion and light.
+For each class on each bike, aim for these 10 shots. They are a checklist for variety, not a fixed order: angle, distance, occlusion and light are filled in afterwards from the photos themselves (step 3 below).
 
 | Shot | Angle | Distance | Notes |
 |---|---|---|---|
@@ -104,7 +104,7 @@ For each class on each bike, take these 10 shots **in this order**. The script r
 | 9 | Any | Medium | **Partly hidden**: behind a wheel, cable, frame tube or hand |
 | 10 | Any | Close | **Different light**: flash, shade or a dim spot |
 
-Shots after 10 (extras for look-alike pairs, or 15 per bike when only two bikes have the part) are kept but their angle columns are left blank: add a note in `captures.csv` if it matters. What counts as each part is defined in ADR 0002.
+Extra shots (for look-alike pairs, or 15 per bike when only two bikes have the part) are welcome. What counts as each part is defined in ADR 0002.
 
 Phone settings: normal photo mode, no portrait/blur, no filters, no zoom. On an iPhone, set *Settings → Camera → Formats → Most Compatible* so photos are JPEG, not HEIC.
 
@@ -118,8 +118,15 @@ Phone settings: normal photo mode, no portrait/blur, no filters, no zoom. On an 
    python datasets/components/prepare_photos.py data/raw/b10 --bike b10 --split test   # a test bike
    ```
 
-3. Check a few prepared photos, fill in the bike's row in the table above, then commit `images/<bike>/` and `captures.csv` on a branch and open a PR.
-4. Post the count per class on #15.
+3. Fill in angle, distance, occlusion and light (needs an Anthropic API key: `pip install anthropic`, then `export ANTHROPIC_API_KEY=...`):
+
+   ```sh
+   python3 datasets/components/describe_photos.py --bike b01
+   ```
+
+   A vision model looks at each photo and answers in fixed categories (defined at the top of the script); `metadata_source` records which model answered. It also lists photos where it could not see the folder's part: check those for a wrong folder. Each photo costs one request of about 2,000 input tokens. Values in a row whose `metadata_source` is set are never overwritten, so a value corrected by hand stays: set its `metadata_source` to `manual`.
+4. Check a few prepared photos, fill in the bike's row in the table above, then commit `images/<bike>/` and `captures.csv` on a branch and open a PR.
+5. Post the count per class on #15.
 
 To create the empty raw folders for a new bike: `python3 -c "import json,pathlib; [pathlib.Path('data/raw/b05',c['name']).mkdir(parents=True,exist_ok=True) for c in json.load(open('backend/app/vision/categories.json'))['categories']]"`
 
