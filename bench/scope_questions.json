@@ -1,0 +1,18 @@
+{
+ "about": "Questions for the component scope (app.rag.calibrate, ADR 0004). 'component' is what the photograph shows, as the detector would name it. 'expect' is the class whose manuals should answer. In the first eight the question is vague and the photograph says what it is about. In the last five the photograph shows one part and the problem is with another: the scope must not block the answer. No page is labelled; the measure is how many of the selected passages come from manuals of the expected class.",
+ "questions": [
+  {"id": "s01", "kind": "vague", "component": "rear_derailleur", "expect": "rear_derailleur", "question": "What is the tightening torque for the mounting bolt?"},
+  {"id": "s02", "kind": "vague", "component": "disc_brake_caliper", "expect": "disc_brake_caliper", "question": "How do I replace the pads?"},
+  {"id": "s03", "kind": "vague", "component": "cassette", "expect": "cassette", "question": "How do I install this?"},
+  {"id": "s04", "kind": "vague", "component": "front_derailleur", "expect": "front_derailleur", "question": "How do I adjust it so it shifts properly?"},
+  {"id": "s05", "kind": "vague", "component": "crankset", "expect": "crankset", "question": "Which tools do I need to remove it?"},
+  {"id": "s06", "kind": "vague", "component": "pedal", "expect": "pedal", "question": "How tight should this be?"},
+  {"id": "s07", "kind": "vague", "component": "chain", "expect": "chain", "question": "How do I check if it is worn?"},
+  {"id": "s08", "kind": "vague", "component": "shift_brake_lever", "expect": "shift_brake_lever", "question": "How do I replace the cable?"},
+  {"id": "s09", "kind": "mismatch", "component": "pedal", "expect": "disc_brake_caliper", "question": "The bike barely stops when I pull the lever, what should I check?"},
+  {"id": "s10", "kind": "mismatch", "component": "pedal", "expect": "chain", "question": "The chain keeps slipping when I push hard, what do I do?"},
+  {"id": "s11", "kind": "mismatch", "component": "crankset", "expect": "rear_derailleur", "question": "The gears do not change properly at the back, how do I adjust them?"},
+  {"id": "s12", "kind": "mismatch", "component": "cassette", "expect": "disc_brake_caliper", "question": "How do I bleed the brakes?"},
+  {"id": "s13", "kind": "mismatch", "component": "chain", "expect": "disc_brake_caliper", "question": "The brake lever feels spongy, what should I do?"}
+ ]
+}

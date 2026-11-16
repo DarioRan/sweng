@@ -83,7 +83,7 @@ class AskResponse(BaseModel):
     sources: list[Source] = []
     hazards: list[Hazard] = []
     confidence: float = Field(ge=0.0, le=1.0)
-    stop_reason: str | None = None  # set when status is truncated
+    stop_reason: str | None = None  # why it stopped (truncated) or did not answer (abstained)
 
 
 # --------------------------------------------------------------- GET /figure

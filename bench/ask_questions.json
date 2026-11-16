@@ -1,0 +1,980 @@
+{
+ "about": "Questions for /ask: calibrating the abstention threshold (app.rag.calibrate) and testing the whole pipeline (app.rag.evaluate). corpus-01 to corpus-16 are the questions of corpus_questions.json; a01-a29 and u01-u24 were added for ADR 0004. 'sources' lists the pages that hold the answer, found by reading the manuals: one group for a fact, two for a conflict. A question without 'sources' has no answer in the corpus. 'must_include' is what a correct answer contains (a nested list: any one of these). 'split': the threshold is chosen on 'calibrate' and checked on 'test', so it is not tuned on the questions it is scored on. No manual text is stored here.",
+ "questions": [
+  {
+   "id": "corpus-01",
+   "category": "fact",
+   "question": "Which wrench removes the bracket axle when replacing the bump stopper on an RD-M820 rear derailleur?",
+   "sources": [
+    [
+     [
+      "DM-RD0001-06",
+      12
+     ]
+    ]
+   ],
+   "must_include": [
+    "5 mm"
+   ],
+   "split": "calibrate"
+  },
+  {
+   "id": "corpus-02",
+   "category": "fact",
+   "question": "What is the tightening torque for the caliper mounting screw on a BR-R9270 disc brake caliper?",
+   "sources": [
+    [
+     [
+      "DM-TORQUE-04",
+      8
+     ]
+    ]
+   ],
+   "anchor": "BR-R9270",
+   "must_include": [
+    "6-8"
+   ],
+   "split": "calibrate"
+  },
+  {
+   "id": "corpus-03",
+   "category": "fact",
+   "why": "A table row: the same nut is 5-7 N·m on other calipers of the same table.",
+   "question": "What is the tightening torque for the flare nut on a BR-R9270 disc brake caliper?",
+   "sources": [
+    [
+     [
+      "DM-TORQUE-04",
+      8
+     ]
+    ]
+   ],
+   "anchor": "BR-R9270",
+   "must_include": [
+    "5-6"
+   ],
+   "must_exclude": [
+    "5-7"
+   ],
+   "split": "test"
+  },
+  {
+   "id": "corpus-04",
+   "category": "fact",
+   "why": "A table row: other calipers of the same table have a bleed nipple at 4-7 N·m instead.",
+   "question": "What is the tightening torque for the bleed screw on a BR-R9270 disc brake caliper?",
+   "sources": [
+    [
+     [
+      "DM-TORQUE-04",
+      8
+     ]
+    ]
+   ],
+   "anchor": "BR-R9270",
+   "must_include": [
+    "4-6"
+   ],
+   "must_exclude": [
+    "4-7"
+   ],
+   "split": "calibrate"
+  },
+  {
+   "id": "corpus-05",
+   "category": "fact",
+   "why": "The same sentence gives 2.5 mm for other levers. Both manuals agree on this lever.",
+   "question": "Which hexagon wrench removes the bleed screw on an ST-R8020 lever?",
+   "sources": [
+    [
+     [
+      "DM-RADBR01-11",
+      24
+     ],
+     [
+      "DM-RADBR01-11",
+      31
+     ],
+     [
+      "DM-TORQUE-04",
+      13
+     ]
+    ]
+   ],
+   "must_include": [
+    "2 mm"
+   ],
+   "must_exclude": [
+    "2.5 mm"
+   ],
+   "split": "calibrate"
+  },
+  {
+   "id": "corpus-06",
+   "category": "fact",
+   "why": "A table row: the pad axle is 2-4 N·m on two other calipers of the same table.",
+   "question": "What is the tightening torque for the pad axle on a BR-R9270 disc brake caliper?",
+   "sources": [
+    [
+     [
+      "DM-TORQUE-04",
+      8
+     ]
+    ]
+   ],
+   "anchor": "BR-R9270",
+   "must_include": [
+    "0.2-0.4"
+   ],
+   "must_exclude": [
+    "2-4"
+   ],
+   "split": "test"
+  },
+  {
+   "id": "corpus-07",
+   "category": "fact",
+   "why": "A table row: the other calipers of the table use a slotted screwdriver.",
+   "question": "Which tool tightens the pad axle on a BR-R8170 disc brake caliper?",
+   "sources": [
+    [
+     [
+      "DM-TORQUE-04",
+      8
+     ]
+    ]
+   ],
+   "anchor": "BR-R8170",
+   "must_include": [
+    "3 mm"
+   ],
+   "must_exclude": [
+    "slotted"
+   ],
+   "split": "calibrate"
+  },
+  {
+   "id": "corpus-08",
+   "category": "fact",
+   "why": "A table row: calipers with a bleed screw instead are 4-6 N·m.",
+   "question": "What is the tightening torque for the bleed nipple on a BR-R9170 disc brake caliper?",
+   "sources": [
+    [
+     [
+      "DM-TORQUE-04",
+      8
+     ]
+    ]
+   ],
+   "anchor": "BR-R9170",
+   "must_include": [
+    "4-7"
+   ],
+   "must_exclude": [
+    "4-6"
+   ],
+   "split": "calibrate"
+  },
+  {
+   "id": "corpus-09",
+   "category": "fact",
+   "why": "The mirror of corpus-05: this lever is in the 2.5 mm row.",
+   "question": "Which hexagon wrench fits the bleed screw on an ST-R9270 lever?",
+   "sources": [
+    [
+     [
+      "DM-TORQUE-04",
+      13
+     ]
+    ]
+   ],
+   "anchor": "ST-R9270",
+   "must_include": [
+    "2.5 mm"
+   ],
+   "must_exclude": [
+    "2 mm"
+   ],
+   "split": "test"
+  },
+  {
+   "id": "corpus-10",
+   "category": "fact",
+   "question": "What is the tightening torque for mounting PD-GR500 pedals on the crank arms?",
+   "sources": [
+    [
+     [
+      "DM-PD0001-05",
+      8
+     ]
+    ]
+   ],
+   "anchor": "PD-GR500",
+   "must_include": [
+    "35-55"
+   ],
+   "split": "calibrate"
+  },
+  {
+   "id": "corpus-11",
+   "category": "fact",
+   "question": "On a front triple, how far should the front derailleur chain guide outer plate be from the tip of the teeth of the largest chainring?",
+   "sources": [
+    [
+     [
+      "DM-FD0003-06",
+      10
+     ]
+    ]
+   ],
+   "must_include": [
+    "1-3"
+   ],
+   "split": "calibrate"
+  },
+  {
+   "id": "corpus-12",
+   "category": "conflict",
+   "why": "The brake manual (2025-04) says 2.5 mm. The torque chart (2023-12) lists this lever in its 2 mm row. The newer manual comes first.",
+   "question": "Which hexagon wrench removes the bleed screw on an ST-R7020 lever?",
+   "sources": [
+    [
+     [
+      "DM-RADBR01-11",
+      24
+     ],
+     [
+      "DM-RADBR01-11",
+      31
+     ]
+    ],
+    [
+     [
+      "DM-TORQUE-04",
+      13
+     ]
+    ]
+   ],
+   "must_include": [
+    "2.5 mm",
+    "2 mm"
+   ],
+   "ordered": true,
+   "split": "test"
+  },
+  {
+   "id": "corpus-13",
+   "category": "unanswerable",
+   "why": "Outside the manuals altogether.",
+   "question": "What tire pressure should I run on my road bike?",
+   "split": "calibrate"
+  },
+  {
+   "id": "corpus-14",
+   "category": "unanswerable",
+   "why": "The model does not exist. The search returns the torque tables of real calipers.",
+   "question": "What is the tightening torque for the caliper mounting screw on a BR-Z9999 disc brake caliper?",
+   "split": "calibrate"
+  },
+  {
+   "id": "corpus-15",
+   "category": "unanswerable",
+   "why": "A real part, but a dealer's manual does not give its weight.",
+   "question": "How much does the RD-M820 rear derailleur weigh?",
+   "split": "test"
+  },
+  {
+   "id": "corpus-16",
+   "category": "unanswerable",
+   "why": "Bike fitting is not in a component manual.",
+   "question": "What saddle height should a rider with an 80 cm inseam use?",
+   "split": "calibrate"
+  },
+  {
+   "id": "a01",
+   "category": "fact",
+   "question": "What is the tightening torque for the B-axle when installing an RD-M8100 rear derailleur on the derailleur hanger?",
+   "sources": [
+    [
+     [
+      "DM-MARD001-06",
+      9
+     ]
+    ]
+   ],
+   "must_include": [
+    "10-12"
+   ],
+   "split": "calibrate"
+  },
+  {
+   "id": "a02",
+   "category": "fact",
+   "question": "What tightening torque should the two left crank arm screws of an FC-M8000 crankset be within?",
+   "sources": [
+    [
+     [
+      "DM-MBFC001-04",
+      4
+     ],
+     [
+      "DM-MBFC001-04",
+      17
+     ]
+    ]
+   ],
+   "must_include": [
+    "12-14"
+   ],
+   "split": "calibrate"
+  },
+  {
+   "id": "a03",
+   "category": "fact",
+   "question": "What is the tightening torque for the bottom bracket cups when installing the bottom bracket of an FC-M8000 crankset?",
+   "sources": [
+    [
+     [
+      "DM-MBFC001-04",
+      12
+     ]
+    ]
+   ],
+   "must_include": [
+    "35-50"
+   ],
+   "split": "test"
+  },
+  {
+   "id": "a04",
+   "category": "fact",
+   "question": "What is the tightening torque for installing an SL-RS25 shift lever on the handlebar?",
+   "sources": [
+    [
+     [
+      "DM-SL0002-07",
+      7
+     ]
+    ]
+   ],
+   "must_include": [
+    "2.5-3"
+   ],
+   "must_exclude": [
+    "2-2.5"
+   ],
+   "split": "calibrate"
+  },
+  {
+   "id": "a05",
+   "category": "fact",
+   "question": "How large a gap should be left between a REVOSHIFT lever and the half grip?",
+   "sources": [
+    [
+     [
+      "DM-SL0002-07",
+      7
+     ]
+    ]
+   ],
+   "must_include": [
+    "0.5 mm"
+   ],
+   "split": "calibrate"
+  },
+  {
+   "id": "a06",
+   "category": "fact",
+   "question": "At what brake pad thickness must the pads of a BR-RX820 caliper no longer be used?",
+   "sources": [
+    [
+     [
+      "DM-GADBR01-09",
+      5
+     ],
+     [
+      "DM-GADBR01-09",
+      48
+     ]
+    ]
+   ],
+   "must_include": [
+    "0.5 mm"
+   ],
+   "split": "test"
+  },
+  {
+   "id": "a07",
+   "category": "fact",
+   "question": "Below what thickness must a disc brake rotor no longer be used, according to the GRX disc brake manual?",
+   "sources": [
+    [
+     [
+      "DM-GADBR01-09",
+      5
+     ]
+    ]
+   ],
+   "must_include": [
+    "1.5 mm"
+   ],
+   "split": "calibrate"
+  },
+  {
+   "id": "a08",
+   "category": "fact",
+   "question": "What is the tightening torque for the rotor lock ring when installing a disc brake rotor on a city or trekking bike?",
+   "sources": [
+    [
+     [
+      "DM-LADBR01-04",
+      12
+     ]
+    ]
+   ],
+   "must_include": [
+    "40"
+   ],
+   "split": "calibrate"
+  },
+  {
+   "id": "a09",
+   "category": "fact",
+   "question": "What is the tightening torque for the cleat fixing bolts once SPD cleats are adjusted and secured for PD-M8100 pedals?",
+   "sources": [
+    [
+     [
+      "DM-MAPD001-07",
+      9
+     ]
+    ]
+   ],
+   "must_include": [
+    "5-6"
+   ],
+   "split": "test"
+  },
+  {
+   "id": "a10",
+   "category": "fact",
+   "question": "What is the tightening torque for the body cover screws when replacing the body covers of a PD-M8120 pedal?",
+   "sources": [
+    [
+     [
+      "DM-MAPD001-07",
+      18
+     ]
+    ]
+   ],
+   "must_include": [
+    "2.7-3.5"
+   ],
+   "split": "calibrate"
+  },
+  {
+   "id": "a11",
+   "category": "fact",
+   "question": "What is the tightening torque for mounting the reflectors on a PD-R550 pedal?",
+   "sources": [
+    [
+     [
+      "DM-PD0002-07",
+      25
+     ]
+    ]
+   ],
+   "must_include": [
+    "2"
+   ],
+   "split": "calibrate"
+  },
+  {
+   "id": "a12",
+   "category": "fact",
+   "question": "What is the tightening torque when attaching a BR-R9100 rim brake caliper to the frame?",
+   "sources": [
+    [
+     [
+      "DM-RACBR01-03",
+      19
+     ]
+    ]
+   ],
+   "must_include": [
+    "8-10"
+   ],
+   "split": "test"
+  },
+  {
+   "id": "a13",
+   "category": "fact",
+   "question": "How much toe-in should the brake shoes of a BR-R8000 rim brake be set with?",
+   "sources": [
+    [
+     [
+      "DM-RACBR01-03",
+      25
+     ]
+    ]
+   ],
+   "must_include": [
+    "0.5 mm"
+   ],
+   "split": "calibrate"
+  },
+  {
+   "id": "a14",
+   "category": "fact",
+   "question": "What is the tightening torque for the guide pulley and tension pulley on an RD-R8150 rear derailleur?",
+   "sources": [
+    [
+     [
+      "DM-RARD010-07",
+      38
+     ]
+    ]
+   ],
+   "must_include": [
+    "2.5-5"
+   ],
+   "split": "calibrate"
+  },
+  {
+   "id": "a15",
+   "category": "fact",
+   "question": "What is the tightening torque for the mounting screw when installing a standard type RD-R7150 rear derailleur?",
+   "sources": [
+    [
+     [
+      "DM-RARD010-07",
+      20
+     ]
+    ]
+   ],
+   "must_include": [
+    "8-10"
+   ],
+   "split": "test"
+  },
+  {
+   "id": "a16",
+   "category": "fact",
+   "question": "What is the tightening torque for the lock ring of a CS-M8200 cassette?",
+   "sources": [
+    [
+     [
+      "DM-MACS010-02",
+      8
+     ],
+     [
+      "DM-MACS010-02",
+      10
+     ]
+    ]
+   ],
+   "must_include": [
+    "30-50"
+   ],
+   "split": "calibrate"
+  },
+  {
+   "id": "a17",
+   "category": "fact",
+   "question": "Which tool is used to tighten the lock ring when installing a 7 to 9-speed cassette?",
+   "sources": [
+    [
+     [
+      "DM-RBCS001-05",
+      8
+     ]
+    ]
+   ],
+   "must_include": [
+    [
+     "TL-LR10",
+     "TL-LR15"
+    ]
+   ],
+   "split": "calibrate"
+  },
+  {
+   "id": "a18",
+   "category": "fact",
+   "question": "Which tool holds the sprockets when removing a LINKGLIDE cassette?",
+   "sources": [
+    [
+     [
+      "DM-LACS001-01",
+      7
+     ]
+    ]
+   ],
+   "must_include": [
+    [
+     "TL-SR23",
+     "TL-SR24"
+    ]
+   ],
+   "split": "test"
+  },
+  {
+   "id": "a19",
+   "category": "fact",
+   "question": "Where must TL-SR24 be set to hold a CS-M9100 cassette when removing it?",
+   "sources": [
+    [
+     [
+      "DM-MACS001-05",
+      9
+     ]
+    ]
+   ],
+   "must_include": [
+    "middle sprocket"
+   ],
+   "split": "calibrate"
+  },
+  {
+   "id": "a20",
+   "category": "fact",
+   "question": "What is the tightening torque for installing an SL-M3100 shifting lever?",
+   "sources": [
+    [
+     [
+      "DM-MDSL002-00",
+      8
+     ]
+    ]
+   ],
+   "must_include": [
+    "5"
+   ],
+   "split": "calibrate"
+  },
+  {
+   "id": "a21",
+   "category": "fact",
+   "question": "What torque is used for the screws when replacing the indicator unit of an SL-M3100 shifter?",
+   "sources": [
+    [
+     [
+      "DM-MDSL002-00",
+      12
+     ]
+    ]
+   ],
+   "must_include": [
+    "0.3-0.6"
+   ],
+   "split": "test"
+  },
+  {
+   "id": "a22",
+   "category": "fact",
+   "question": "What clearance is required between the chain guide outer plate and the largest chainring when installing a direct mount MTB front derailleur?",
+   "sources": [
+    [
+     [
+      "DM-FD0001-03",
+      9
+     ]
+    ]
+   ],
+   "must_include": [
+    "1-3"
+   ],
+   "split": "calibrate"
+  },
+  {
+   "id": "a23",
+   "category": "fact",
+   "question": "What tightening torque secures a direct mount MTB front derailleur with a 5 mm Allen key?",
+   "sources": [
+    [
+     [
+      "DM-FD0001-03",
+      9
+     ],
+     [
+      "DM-FD0001-03",
+      11
+     ]
+    ]
+   ],
+   "must_include": [
+    "5-7"
+   ],
+   "split": "calibrate"
+  },
+  {
+   "id": "a24",
+   "category": "fact",
+   "question": "What is the tightening torque for the fixing screw when installing an MTB hydraulic disc brake lever?",
+   "sources": [
+    [
+     [
+      "DM-MADBR01-08",
+      11
+     ]
+    ]
+   ],
+   "must_include": [
+    "4-6"
+   ],
+   "split": "test"
+  },
+  {
+   "id": "a25",
+   "category": "fact",
+   "question": "What is the tightening torque for installing a sub brake lever on a GRX handlebar?",
+   "sources": [
+    [
+     [
+      "DM-GADBR01-09",
+      13
+     ]
+    ]
+   ],
+   "must_include": [
+    "2-4"
+   ],
+   "split": "calibrate"
+  },
+  {
+   "id": "a26",
+   "category": "fact",
+   "question": "What is the temporary tightening torque for SPD cleats when they are first installed on the shoe?",
+   "sources": [
+    [
+     [
+      "DM-MAPD001-07",
+      8
+     ]
+    ]
+   ],
+   "must_include": [
+    "2.5"
+   ],
+   "split": "calibrate"
+  },
+  {
+   "id": "a27",
+   "category": "fact",
+   "question": "After installing the cable on an RD-M9100 rear derailleur, approximately how long should the protruding inner cable be when it is cut?",
+   "sources": [
+    [
+     [
+      "DM-MARD001-06",
+      18
+     ]
+    ]
+   ],
+   "must_include": [
+    "20 mm"
+   ],
+   "split": "test"
+  },
+  {
+   "id": "a28",
+   "category": "fact",
+   "question": "What tightening torque is specified for installing the pedals on an FC-MT500 crank arm?",
+   "sources": [
+    [
+     [
+      "DM-MBFC001-04",
+      6
+     ]
+    ]
+   ],
+   "must_include": [
+    "35-55"
+   ],
+   "split": "calibrate"
+  },
+  {
+   "id": "a29",
+   "category": "fact",
+   "question": "How is the smallest sprocket placed when installing a 10-51T CS-M8200 cassette?",
+   "sources": [
+    [
+     [
+      "DM-MACS010-02",
+      7
+     ]
+    ]
+   ],
+   "must_include": [
+    "wide section"
+   ],
+   "split": "calibrate"
+  },
+  {
+   "id": "u01",
+   "category": "unanswerable",
+   "why": "Outside the manuals.",
+   "question": "How much air pressure should I put in 28 mm road tyres?",
+   "split": "calibrate"
+  },
+  {
+   "id": "u02",
+   "category": "unanswerable",
+   "why": "Outside the manuals.",
+   "question": "How do I set up tubeless tyres on my wheels?",
+   "split": "test"
+  },
+  {
+   "id": "u03",
+   "category": "unanswerable",
+   "why": "Suspension is not in the corpus.",
+   "question": "How much sag should I set on my suspension fork?",
+   "split": "calibrate"
+  },
+  {
+   "id": "u04",
+   "category": "unanswerable",
+   "why": "Outside the manuals.",
+   "question": "What spoke tension should a rear wheel have?",
+   "split": "calibrate"
+  },
+  {
+   "id": "u05",
+   "category": "unanswerable",
+   "why": "Another brand.",
+   "question": "What is the tightening torque for the mounting bolt of a SRAM GX Eagle rear derailleur?",
+   "split": "test"
+  },
+  {
+   "id": "u06",
+   "category": "unanswerable",
+   "why": "Another brand; the Shimano bleed procedures look relevant.",
+   "question": "How do I bleed a Magura MT5 brake?",
+   "split": "calibrate"
+  },
+  {
+   "id": "u07",
+   "category": "unanswerable",
+   "why": "Another brand.",
+   "question": "Which Campagnolo Ekar cassette fits my hub?",
+   "split": "calibrate"
+  },
+  {
+   "id": "u08",
+   "category": "unanswerable",
+   "why": "Not in a dealer's manual.",
+   "question": "How long is the warranty on Shimano components?",
+   "split": "test"
+  },
+  {
+   "id": "u09",
+   "category": "unanswerable",
+   "why": "A real part; prices are not in the manuals.",
+   "question": "How much does a CS-M8100 cassette cost?",
+   "split": "calibrate"
+  },
+  {
+   "id": "u10",
+   "category": "unanswerable",
+   "why": "A real part; weights are not in the manuals.",
+   "question": "How much does an FC-M8000 crankset weigh?",
+   "split": "calibrate"
+  },
+  {
+   "id": "u11",
+   "category": "unanswerable",
+   "why": "No such part; the RD-M8100 page matches every other word.",
+   "question": "What is the tightening torque for the B-axle on an RD-M9999 rear derailleur?",
+   "split": "test"
+  },
+  {
+   "id": "u12",
+   "category": "unanswerable",
+   "why": "No such part.",
+   "question": "What is the lock ring torque for a CS-R9999 cassette?",
+   "split": "calibrate"
+  },
+  {
+   "id": "u13",
+   "category": "unanswerable",
+   "why": "No such part; the bleed screw rows match.",
+   "question": "Which hexagon wrench removes the bleed screw on an ST-R9999 lever?",
+   "split": "calibrate"
+  },
+  {
+   "id": "u14",
+   "category": "unanswerable",
+   "why": "No such part.",
+   "question": "What is the tightening torque for the left crank arm screws on an FC-M9999 crankset?",
+   "split": "test"
+  },
+  {
+   "id": "u15",
+   "category": "unanswerable",
+   "why": "Headsets are not in the corpus.",
+   "question": "What headset preload should I use on a tapered steerer?",
+   "split": "calibrate"
+  },
+  {
+   "id": "u16",
+   "category": "unanswerable",
+   "why": "Outside the manuals.",
+   "question": "What frame size should I buy for my height of 180 cm?",
+   "split": "calibrate"
+  },
+  {
+   "id": "u17",
+   "category": "unanswerable",
+   "why": "Outside the manuals.",
+   "question": "How do I adjust the saddle angle?",
+   "split": "test"
+  },
+  {
+   "id": "u18",
+   "category": "unanswerable",
+   "why": "Outside the manuals.",
+   "question": "How do I fix a puncture on the road?",
+   "split": "calibrate"
+  },
+  {
+   "id": "u19",
+   "category": "unanswerable",
+   "why": "Outside the manuals.",
+   "question": "How do I wrap handlebar tape?",
+   "split": "calibrate"
+  },
+  {
+   "id": "u20",
+   "category": "unanswerable",
+   "why": "Advice, not in the manuals.",
+   "question": "What gear ratio is best for climbing on a road bike?",
+   "split": "test"
+  },
+  {
+   "id": "u21",
+   "category": "unanswerable",
+   "why": "Outside the manuals.",
+   "question": "How many calories does an hour of cycling burn?",
+   "split": "calibrate"
+  },
+  {
+   "id": "u22",
+   "category": "unanswerable",
+   "why": "Another brand.",
+   "question": "What is the tightening torque for the rear derailleur of a Campagnolo Super Record groupset?",
+   "split": "calibrate"
+  },
+  {
+   "id": "u23",
+   "category": "unanswerable",
+   "why": "Another brand, suspension.",
+   "question": "What is the recommended service interval for an SR Suntour fork?",
+   "split": "test"
+  },
+  {
+   "id": "u24",
+   "category": "unanswerable",
+   "why": "A real part; service life is not given.",
+   "question": "How many kilometres does an RD-M8100 rear derailleur last before it needs replacing?",
+   "split": "calibrate"
+  }
+ ]
+}

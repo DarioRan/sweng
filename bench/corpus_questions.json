@@ -1,0 +1,137 @@
+{
+  "about": "Questions for the LLM test on real corpus passages. No manual text is stored here: the passages are fetched from the index when the cases are built (bench/README.md). 'sources' lists the pages that hold the answer, found by reading the manuals. It is a list of groups: one group for a fact, two for a conflict, where each group is one side and the newer manual's value comes first in 'must_include'. 'anchor' is the part code: a retrieved passage that names it and holds the expected values also counts as a source, because the torque chart repeats the manuals. A question with no 'sources' has no answer in the corpus.",
+  "questions": [
+    {
+      "id": "corpus-01",
+      "category": "fact",
+      "question": "Which wrench removes the bracket axle when replacing the bump stopper on an RD-M820 rear derailleur?",
+      "sources": [[["DM-RD0001-06", 12]]],
+      "must_include": ["5 mm"]
+    },
+    {
+      "id": "corpus-02",
+      "category": "fact",
+      "question": "What is the tightening torque for the caliper mounting screw on a BR-R9270 disc brake caliper?",
+      "sources": [[["DM-TORQUE-04", 8]]],
+      "anchor": "BR-R9270",
+      "must_include": ["6-8"]
+    },
+    {
+      "id": "corpus-03",
+      "category": "fact",
+      "why": "A table row: the same nut is 5-7 N·m on other calipers of the same table.",
+      "question": "What is the tightening torque for the flare nut on a BR-R9270 disc brake caliper?",
+      "sources": [[["DM-TORQUE-04", 8]]],
+      "anchor": "BR-R9270",
+      "must_include": ["5-6"],
+      "must_exclude": ["5-7"]
+    },
+    {
+      "id": "corpus-04",
+      "category": "fact",
+      "why": "A table row: other calipers of the same table have a bleed nipple at 4-7 N·m instead.",
+      "question": "What is the tightening torque for the bleed screw on a BR-R9270 disc brake caliper?",
+      "sources": [[["DM-TORQUE-04", 8]]],
+      "anchor": "BR-R9270",
+      "must_include": ["4-6"],
+      "must_exclude": ["4-7"]
+    },
+    {
+      "id": "corpus-05",
+      "category": "fact",
+      "why": "The same sentence gives 2.5 mm for other levers. Both manuals agree on this lever.",
+      "question": "Which hexagon wrench removes the bleed screw on an ST-R8020 lever?",
+      "sources": [[["DM-RADBR01-11", 24], ["DM-RADBR01-11", 31], ["DM-TORQUE-04", 13]]],
+      "must_include": ["2 mm"],
+      "must_exclude": ["2.5 mm"]
+    },
+    {
+      "id": "corpus-06",
+      "category": "fact",
+      "why": "A table row: the pad axle is 2-4 N·m on two other calipers of the same table.",
+      "question": "What is the tightening torque for the pad axle on a BR-R9270 disc brake caliper?",
+      "sources": [[["DM-TORQUE-04", 8]]],
+      "anchor": "BR-R9270",
+      "must_include": ["0.2-0.4"],
+      "must_exclude": ["2-4"]
+    },
+    {
+      "id": "corpus-07",
+      "category": "fact",
+      "why": "A table row: the other calipers of the table use a slotted screwdriver.",
+      "question": "Which tool tightens the pad axle on a BR-R8170 disc brake caliper?",
+      "sources": [[["DM-TORQUE-04", 8]]],
+      "anchor": "BR-R8170",
+      "must_include": ["3 mm"],
+      "must_exclude": ["slotted"]
+    },
+    {
+      "id": "corpus-08",
+      "category": "fact",
+      "why": "A table row: calipers with a bleed screw instead are 4-6 N·m.",
+      "question": "What is the tightening torque for the bleed nipple on a BR-R9170 disc brake caliper?",
+      "sources": [[["DM-TORQUE-04", 8]]],
+      "anchor": "BR-R9170",
+      "must_include": ["4-7"],
+      "must_exclude": ["4-6"]
+    },
+    {
+      "id": "corpus-09",
+      "category": "fact",
+      "why": "The mirror of corpus-05: this lever is in the 2.5 mm row.",
+      "question": "Which hexagon wrench fits the bleed screw on an ST-R9270 lever?",
+      "sources": [[["DM-TORQUE-04", 13]]],
+      "anchor": "ST-R9270",
+      "must_include": ["2.5 mm"],
+      "must_exclude": ["2 mm"]
+    },
+    {
+      "id": "corpus-10",
+      "category": "fact",
+      "question": "What is the tightening torque for mounting PD-GR500 pedals on the crank arms?",
+      "sources": [[["DM-PD0001-05", 8]]],
+      "anchor": "PD-GR500",
+      "must_include": ["35-55"]
+    },
+    {
+      "id": "corpus-11",
+      "category": "fact",
+      "question": "On a front triple, how far should the front derailleur chain guide outer plate be from the tip of the teeth of the largest chainring?",
+      "sources": [[["DM-FD0003-06", 10]]],
+      "must_include": ["1-3"]
+    },
+    {
+      "id": "corpus-12",
+      "category": "conflict",
+      "why": "The brake manual (2025-04) says 2.5 mm. The torque chart (2023-12) lists this lever in its 2 mm row. The newer manual comes first.",
+      "question": "Which hexagon wrench removes the bleed screw on an ST-R7020 lever?",
+      "sources": [[["DM-RADBR01-11", 24], ["DM-RADBR01-11", 31]], [["DM-TORQUE-04", 13]]],
+      "must_include": ["2.5 mm", "2 mm"],
+      "ordered": true
+    },
+    {
+      "id": "corpus-13",
+      "category": "unanswerable",
+      "why": "Outside the manuals altogether.",
+      "question": "What tire pressure should I run on my road bike?"
+    },
+    {
+      "id": "corpus-14",
+      "category": "unanswerable",
+      "why": "The model does not exist. The search returns the torque tables of real calipers.",
+      "question": "What is the tightening torque for the caliper mounting screw on a BR-Z9999 disc brake caliper?"
+    },
+    {
+      "id": "corpus-15",
+      "category": "unanswerable",
+      "why": "A real part, but a dealer's manual does not give its weight.",
+      "question": "How much does the RD-M820 rear derailleur weigh?"
+    },
+    {
+      "id": "corpus-16",
+      "category": "unanswerable",
+      "why": "Bike fitting is not in a component manual.",
+      "question": "What saddle height should a rider with an 80 cm inseam use?"
+    }
+  ]
+}
