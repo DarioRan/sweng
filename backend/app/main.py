@@ -50,6 +50,8 @@ async def health(request: Request) -> JSONResponse:
         "status": "ok" if all_ok else "degraded",
         "env": settings.app_env,
         "llm_backend": settings.llm_backend,
+        # The client draws and names only detections at or above this (Rule 2, T-208).
+        "detector_confidence_threshold": settings.detector_confidence_threshold,
         "stores": report,
     }
     return JSONResponse(body, status_code=200 if all_ok else 503)
