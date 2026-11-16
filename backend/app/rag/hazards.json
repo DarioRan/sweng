@@ -1,0 +1,25 @@
+{
+ "about": "The hazard list (Rule 3, T-503, US-27). Each entry is a pattern matched, without regard to case, against the sentences of the manual passages an answer uses. A matching sentence is shown in the manual's own words, ahead of the first step taken from that passage. 'kind': 'hazard' is a warning. 'consult' is the manual telling the reader to go to a dealer in some situation: shown as a warning marked professional-only. 'stop' marks work the user must not be walked through: the passage is withheld from the model, and the answer stops there with the sentence as its reason. This is a starter list written from the wording of the 27 Shimano manuals; the 'stop' marks are the team's to author (see ADR 0004, open items).",
+ "ignore": [
+  "failure to follow the instructions (will|could)",
+  "intended primarily for use by professional bicycle mechanics",
+  "not professionally trained for bicycle assembly",
+  "obtain a hard ?copy of the user",
+  "do not disassemble or modi ?fy the product other than as stated",
+  "must be observed at all times"
+ ],
+ "entries": [
+  {"id": "injury", "kind": "hazard", "pattern": "serious injury|personal injury|danger of injury|cause (an )?injury|avoid injury|not to cause injury|may be injured|injury to your"},
+  {"id": "fall", "kind": "hazard", "pattern": "fall off|fall over|lose control|\\bcrash\\b|fall or collision"},
+  {"id": "brake-failure", "kind": "hazard", "pattern": "prevent the brakes from operating|brakes? (may|might|could|will) (not|fail|stop|lose)|insufficient braking force|vapor lock"},
+  {"id": "burn", "kind": "hazard", "pattern": "become hot|get burned|\\bburns?\\b"},
+  {"id": "fluid", "kind": "hazard", "pattern": "(mineral oil|brake fluid).{0,120}(eyes|skin|inhal|swallow|drink)|contact with (the )?(eyes|skin)|seek medical"},
+  {"id": "stored-force", "kind": "hazard", "pattern": "sudden release|spring (may|might|could|will)|under tension|fly (out|off)"},
+  {"id": "protection", "kind": "hazard", "pattern": "wear (gloves|approved eye protection|eye protection|safety glasses|goggles)"},
+  {"id": "pinch", "kind": "hazard", "pattern": "pinch(ing)? your fingers|fingers? (may|might|could|will)? ?(be|get|become) caught|caught (with)?in the openings"},
+  {"id": "chain-break", "kind": "hazard", "pattern": "chain (may|might|could|will) break|quick-link (could|may|might|will) (detach|become)"},
+  {"id": "part-failure", "kind": "hazard", "pattern": "(may|might|could|will) (break|crack|come off|become detached|detach)\\b"},
+  {"id": "do-not-reuse", "kind": "hazard", "pattern": "(never|do not) re-?use"},
+  {"id": "consult-dealer", "kind": "consult", "pattern": "\\bif\\b.{0,200}(consult|contact) (a|an|the|your) (professional bicycle dealer|dealer|place of purchase|distributor|agency|bicycle dealer)|stop using the bicycle"}
+ ]
+}
