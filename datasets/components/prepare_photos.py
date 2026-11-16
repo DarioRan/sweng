@@ -10,7 +10,7 @@ images/<bike>/<class>/, plus one row per photo in captures.csv.
 Usage, from the repository root:
 
     python datasets/components/prepare_photos.py data/raw/b01 --bike b01
-    python datasets/components/prepare_photos.py data/raw/b04 --bike b04 --split test
+    python datasets/components/prepare_photos.py data/raw/b10 --bike b10 --split test
 
 Photos are taken in recipe order (shots 1-10, see README), so the shot number
 fills in angle, distance, occlusion and light. Running it again skips photos

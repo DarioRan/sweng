@@ -20,12 +20,17 @@ datasets/components/
 
 Bike ids are `b01`, `b02`, … in the order bikes are photographed. **Whole bikes are held out for testing**: every photo of a test bike has `split = test` and is never used for training or tuning. Photos of the same bike in both training and test would make the detector look better than it is.
 
+**No test bike is chosen yet: every bike so far is a training bike.** The test bikes are photographed later, for that purpose, before the detector is first trained (T-201). Between them they need about 10 photos of every class, so look for bikes with many of the classes, including disc brakes and dual-pivot calipers.
+
 | Bike | Type | Split | Notes |
 |---|---|---|---|
 | b01 | City bike, chain guard, hub gear, V-brakes | train | |
 | b02 | Full-suspension MTB, 3×7 speed, V-brakes | train | |
 | b03 | TBM city e-bike (Bordeaux shared bike) | train | |
-| b04 | | test | |
+| b04 | Photographed 16 Nov in a bike rack | train | Photos may come from more than one bike: to regroup |
+| b05 | Photographed 16 Nov in a bike rack | train | |
+| b06 | Photographed 16 Nov in a bike rack | train | The two photos may be two bikes: to regroup |
+| b07 | White frame, SRAM rear derailleur, Shimano Tourney front derailleur | train | |
 
 ### Choosing the bikes
 
@@ -45,7 +50,7 @@ Mix road, MTB and city bikes, and 11- and 12-speed parts where possible.
 | Class, per bike | 10 (the recipe below) |
 | Class, per bike, when only 2 bikes have it | 15 |
 | Bike | about 80–100: only the classes it has |
-| Class, in total | about 40: 30 from the training bikes, 10 from the test bike |
+| Class, in total | about 40: 30 from the training bikes, 10 from the test bikes |
 | Whole set | about 480 |
 
 ## The classes: what each photo must show
@@ -110,7 +115,7 @@ Phone settings: normal photo mode, no portrait/blur, no filters, no zoom. On an 
 
    ```sh
    python datasets/components/prepare_photos.py data/raw/b01 --bike b01
-   python datasets/components/prepare_photos.py data/raw/b04 --bike b04 --split test
+   python datasets/components/prepare_photos.py data/raw/b10 --bike b10 --split test   # a test bike
    ```
 
 3. Check a few prepared photos, fill in the bike's row in the table above, then commit `images/<bike>/` and `captures.csv` on a branch and open a PR.
