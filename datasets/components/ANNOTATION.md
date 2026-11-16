@@ -96,11 +96,11 @@ Someone who did not annotate the bike opens its review sheets (`overlay --bike b
 Whole bikes, never single photos, are put in a split: a bike's photos look alike, so splitting them would leak test photos into training.
 
 ```json
-{ "bikes": { "b01": "train", "b02": "train", "b03": "train", "b10": "test" } }
+{ "bikes": { "b01": "val", "b02": "train", "b03": "train", "b10": "test" } }
 ```
 
-- **test**: never used for training or for any decision. No test bike is chosen yet: they are photographed for the purpose before the first training run, so step 6 waits until then. Annotation of the training bikes does not. Between them, the test bikes need at least 10 boxes of every class; `check --strict` reports what is missing.
-- **val**: one training bike set aside for tuning and early stopping, once there are at least four training bikes. Until then, the detector work (T-201) uses a random 15% of the training photos and says so.
+- **test**: never used for training or for any decision. No test bike is chosen yet: they are photographed for the purpose before the first training run, and are added to `splits.json` then. Train and val are already fixed. Between them, the test bikes need at least 10 boxes of every class; `check --strict` reports what is missing.
+- **val**: whole bikes set aside for tuning and early stopping: **b01 and b07** (32 photos, 24%). Together they are the only choice that puts every annotated class in val while train keeps at least 12 boxes of each. Their missing boxes (see the review) make val precision look worse than it is, so they are reviewed first.
 - Once merged, a bike never changes split. New bikes can be added.
 
 Run `python3 datasets/components/annotations.py dupes` before fixing the split: near-identical photos on different bikes would mean a mislabelled bike.

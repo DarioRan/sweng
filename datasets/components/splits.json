@@ -1,0 +1,11 @@
+{
+ "bikes": {
+  "b01": "val",
+  "b02": "train",
+  "b03": "train",
+  "b04": "train",
+  "b05": "train",
+  "b06": "train",
+  "b07": "val"
+ }
+}

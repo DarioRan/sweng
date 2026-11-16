@@ -80,7 +80,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("raw_dir", type=Path, help="one bike's raw folder, a subfolder per class")
     parser.add_argument("--bike", required=True, help="bike id, e.g. b01")
-    parser.add_argument("--split", choices=["train", "test"], default="train")
+    parser.add_argument("--split", choices=["train", "val", "test"], default="train")
     parser.add_argument(
         "--recipe", action="store_true",
         help="photos follow the README's 10-shot order: fill in angles from the shot number",
