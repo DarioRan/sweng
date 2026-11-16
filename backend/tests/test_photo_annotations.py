@@ -78,6 +78,69 @@ def test_import_maps_labels_by_name_and_rescales_boxes() -> None:
     assert first["bbox"] == [10.0, 10.0, 100.0, 80.0]
 
 
+def test_import_reads_label_studio_json_too() -> None:
+    rows = _photos(2)
+    w, h = ann.jpeg_size(ann.HERE / rows[0]["file_name"])
+    box = {"x": 10.0, "y": 20.0, "width": 50.0, "height": 25.0, "rectanglelabels": ["chain"]}
+    tasks = [
+        {
+            "data": {"image": "/data/upload/1/3e98f5c1-" + Path(rows[0]["file_name"]).name},
+            "annotations": [
+                {
+                    "was_cancelled": False,
+                    "result": [
+                        {
+                            "type": "rectanglelabels",
+                            "original_width": w,
+                            "original_height": h,
+                            "value": box,
+                        }
+                    ],
+                }
+            ],
+        },
+        {"data": {"image": "/x-" + Path(rows[1]["file_name"]).name}, "annotations": []},
+    ]
+    parts = ann.convert(ann.from_label_studio_json(tasks), annotator="test")
+    coco = parts[rows[0]["bike"]]
+    # the unsubmitted second photo is left out
+    assert [i["file_name"] for i in coco["images"]] == [rows[0]["file_name"]]
+    x, y, bw, bh = coco["annotations"][0]["bbox"]
+    assert (x, y) == (round(w * 0.1, 1), round(h * 0.2, 1))
+    assert (bw, bh) == pytest.approx((w * 0.5, h * 0.25), abs=0.1)
+    by_name = {c["name"]: c["id"] for c in ann.load_categories()}
+    assert coco["annotations"][0]["category_id"] == by_name["chain"]
+
+
+def test_import_reads_makesense_csv_and_joins_exports() -> None:
+    rows = _photos(2)
+    w, h = ann.jpeg_size(ann.HERE / rows[0]["file_name"])
+    csv_text = (
+        "label_name,bbox_x,bbox_y,bbox_width,bbox_height,image_name,image_width,image_height\n"
+        f"pedal,10,20,100,50,{Path(rows[0]['file_name']).name},{w},{h}\n"
+        f"chain,5,5,40,30,{Path(rows[0]['file_name']).name},{w},{h}\n"
+    )
+    joined = ann.join_exports([ann.from_makesense_csv(csv_text), _export(rows[1:])])
+    parts = ann.convert(joined, annotator="test")
+    by_name = {c["name"]: c["id"] for c in ann.load_categories()}
+    files = {i["file_name"]: i["id"] for p in parts.values() for i in p["images"]}
+    assert set(files) == {rows[0]["file_name"], rows[1]["file_name"]}
+    first = parts[rows[0]["bike"]]
+    boxes = [
+        (a["category_id"], a["bbox"])
+        for a in first["annotations"]
+        if a["image_id"] == files[rows[0]["file_name"]]
+    ]
+    assert (by_name["pedal"], [10.0, 20.0, 100.0, 50.0]) in boxes
+    assert (by_name["chain"], [5.0, 5.0, 40.0, 30.0]) in boxes
+
+
+def test_a_photo_in_two_exports_is_rejected() -> None:
+    export = _export(_photos(1))
+    with pytest.raises(ValueError, match="twice"):
+        ann.convert(ann.join_exports([export, export]), annotator="test")
+
+
 def test_import_rejects_a_label_outside_the_class_list() -> None:
     export = _export(_photos(1))
     export["categories"][0]["name"] = "kickstand"

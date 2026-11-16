@@ -19,6 +19,7 @@ check runs in CI without extra dependencies.
 
 import argparse
 import csv
+import io
 import json
 import random
 import re
@@ -185,9 +186,12 @@ def cmd_setup(args: argparse.Namespace) -> None:
     out.mkdir(parents=True)
     for f in files:
         shutil.copy2(HERE / f, out / Path(f).name)
-    (WORK_DIR / "label_config.xml").write_text(label_config(load_categories()))
+    categories = load_categories()
+    (WORK_DIR / "label_config.xml").write_text(label_config(categories))
+    (WORK_DIR / "labels.txt").write_text("".join(c["name"] + "\n" for c in categories))
     print(f"{len(files)} photos copied to {out.relative_to(ROOT)}")
-    print(f"label config: {(WORK_DIR / 'label_config.xml').relative_to(ROOT)}")
+    print(f"label config: {(WORK_DIR / 'label_config.xml').relative_to(ROOT)} (Label Studio)")
+    print(f"label list: {(WORK_DIR / 'labels.txt').relative_to(ROOT)} (makesense.ai)")
 
 
 # ---------------------------------------------------------------- import
@@ -302,8 +306,111 @@ def combine(parts: dict[str, dict]) -> dict:
     return coco
 
 
+def from_label_studio_json(tasks: list[dict]) -> dict:
+    """A Label Studio JSON export (a list of tasks) -> the COCO shape convert() reads.
+
+    Boxes are stored in percent of the photo; each task's last submitted annotation is used.
+    Tasks with no submitted annotation are left out, as in Label Studio's COCO export.
+    """
+    names: dict[str, int] = {}
+    images, annotations = [], []
+    for task in tasks:
+        done = [a for a in task.get("annotations", []) if not a.get("was_cancelled")]
+        if not done:
+            continue
+        results = [r for r in done[-1]["result"] if r.get("type") == "rectanglelabels"]
+        image_id = len(images) + 1
+        width = height = None
+        for r in results:
+            width, height = r["original_width"], r["original_height"]
+            v = r["value"]
+            for label in v["rectanglelabels"]:
+                annotations.append(
+                    {
+                        "image_id": image_id,
+                        "category_id": names.setdefault(label, len(names)),
+                        "bbox": [
+                            v["x"] * width / 100,
+                            v["y"] * height / 100,
+                            v["width"] * width / 100,
+                            v["height"] * height / 100,
+                        ],
+                    }
+                )
+        if width is None:  # submitted with no box: take the size from the photo itself
+            m = NAME_RE.search(task["data"]["image"])
+            row = load_captures().get(m.group(0)) if m else None
+            if not row:
+                raise ValueError(f"{task['data']['image']}: not a photo in captures.csv")
+            width, height = jpeg_size(HERE / row["file_name"])
+        images.append(
+            {"id": image_id, "file_name": task["data"]["image"], "width": width, "height": height}
+        )
+    categories = [{"id": i, "name": n} for n, i in names.items()]
+    return {"images": images, "annotations": annotations, "categories": categories}
+
+
+def from_makesense_csv(text: str) -> dict:
+    """A makesense.ai "single CSV file" export -> the COCO shape convert() reads.
+
+    Columns: label_name, bbox_x, bbox_y, bbox_width, bbox_height (pixels), image_name,
+    image_width, image_height. Photos with no box do not appear in the file at all.
+    """
+    names: dict[str, int] = {}
+    images: dict[str, dict] = {}
+    annotations = []
+    for r in csv.DictReader(io.StringIO(text)):
+        img = images.setdefault(
+            r["image_name"],
+            {
+                "id": len(images) + 1,
+                "file_name": r["image_name"],
+                "width": int(r["image_width"]),
+                "height": int(r["image_height"]),
+            },
+        )
+        annotations.append(
+            {
+                "image_id": img["id"],
+                "category_id": names.setdefault(r["label_name"], len(names)),
+                "bbox": [float(r[k]) for k in ("bbox_x", "bbox_y", "bbox_width", "bbox_height")],
+            }
+        )
+    categories = [{"id": i, "name": n} for n, i in names.items()]
+    return {"images": list(images.values()), "annotations": annotations, "categories": categories}
+
+
+def read_export(path: Path) -> dict:
+    """Any supported export file, in the COCO shape convert() reads."""
+    text = path.read_text(encoding="utf-8-sig")
+    if path.suffix.lower() == ".csv":  # makesense.ai
+        return from_makesense_csv(text)
+    export = json.loads(text)
+    if isinstance(export, list):  # Label Studio's JSON export rather than its COCO export
+        return from_label_studio_json(export)
+    return export
+
+
+def join_exports(exports: list[dict]) -> dict:
+    """Several exports as one, categories matched by name (a photo in two of them is an error
+    in convert())."""
+    names: dict[str, int] = {}
+    joined: dict = {"images": [], "annotations": [], "categories": []}
+    for export in exports:
+        cats = {c["id"]: names.setdefault(c["name"], len(names)) for c in export["categories"]}
+        offset = len(joined["images"])
+        ids = {img["id"]: offset + k + 1 for k, img in enumerate(export["images"])}
+        joined["images"] += [{**img, "id": ids[img["id"]]} for img in export["images"]]
+        joined["annotations"] += [
+            {**a, "image_id": ids[a["image_id"]], "category_id": cats[a["category_id"]]}
+            for a in export["annotations"]
+        ]
+    joined["categories"] = [{"id": i, "name": n} for n, i in names.items()]
+    return joined
+
+
 def cmd_import(args: argparse.Namespace) -> None:
-    parts = convert(json.loads(args.export.read_text()), args.annotator)
+    parts = convert(join_exports([read_export(p) for p in args.exports]), args.annotator)
     if not parts:
         sys.exit("the export has no photos")
     if args.out:
@@ -697,8 +804,13 @@ def main() -> None:
     p.add_argument("--seed", type=int, default=16)
     p.set_defaults(func=cmd_setup)
 
-    p = sub.add_parser("import", help="Label Studio COCO export -> annotations/<bike>.json")
-    p.add_argument("export", type=Path)
+    p = sub.add_parser("import", help="tool exports -> annotations/<bike>.json")
+    p.add_argument(
+        "exports",
+        type=Path,
+        nargs="+",
+        help="Label Studio COCO or JSON export, or makesense.ai CSV; several are joined",
+    )
     p.add_argument("--annotator", required=True)
     p.add_argument("--out", type=Path, help="write one file instead (calibration, review)")
     p.add_argument("--force", action="store_true", help="replace existing bike files")
