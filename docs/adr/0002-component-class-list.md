@@ -102,7 +102,7 @@ Two of our twelve classes get labels straight from DelftBikes, three might, and 
 
 **Relabelling.** None needed: annotation (T-310) has not started. Six photos of b01 that had been sorted into `rim_brake_caliper` are moved to `v_brake`, since they show V-brakes.
 
-**Consequences.** The corpus (T-203) adds DM-GN0001, which it does not hold yet, with `v_brake` in its `classes` column in `docs/corpus/provenance.csv`; DM-TORQUE's row gains `v_brake` too. The capture plan adds `v_brake` and its look-alike pair.
+**Consequences.** DM-GN0001 (revision 30) is added to the corpus record, `docs/corpus/provenance.csv`, with `v_brake` in its `components` column; DM-TORQUE's row lists `v_brake` too. The corpus ingestion (T-203b) indexes it with the others. The capture plan adds `v_brake` and its look-alike pair.
 
 ## Open items before this ADR moves to Accepted
 
