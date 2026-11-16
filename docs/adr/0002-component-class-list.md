@@ -37,7 +37,7 @@ Twelve classes: eleven frozen on 2026-10-05, and `v_brake` added by Amendment 1.
 | 9 | `disc_brake_caliper` | The caliper on the fork or frame mount that grips the rotor. | DM-RADBR01 (road), DM-MADBR01 (MTB) | to capture (T-309) |
 | 10 | `disc_rotor` | The metal disc bolted to the hub that the caliper grips. | DM-MADBR01, DM-RADBR01 | to capture (T-309) |
 | 11 | `rim_brake_caliper` | A dual-pivot caliper rim brake, held by a single bolt at the fork crown or seatstay bridge. V-brakes are class 12; cantilevers are out of scope. | DM-RACBR01 | to capture (T-309) |
-| 12 | `v_brake` | A linear-pull (V-) rim brake: two tall arms, each pivoting on its own boss on the fork legs or seatstays, joined at the top by the cable and its curved guide tube ("noodle"). Box covers both arms and the noodle. | to confirm (Amendment 1) | to capture (T-309) |
+| 12 | `v_brake` | A linear-pull (V-) rim brake: two tall arms, each pivoting on its own boss on the fork legs or seatstays, joined at the top by the cable and its curved guide tube ("noodle"). Box covers both arms and the noodle. | DM-GN0001 (General Operations: V-BRAKE installation section) | to capture (T-309) |
 
 Supercategories: `drivetrain` (1–7), `control` (8), `brake` (9–12).
 
@@ -98,16 +98,16 @@ Two of our twelve classes get labels straight from DelftBikes, three might, and 
 
 **Decision.** Add `v_brake` as id 12, supercategory `brake`, with the definition in the table above. Ids 1–11 are unchanged. Cantilever brakes stay out of scope.
 
-**Against the admission criteria.** (1) A brake component: yes. (2) Visually distinct from a dual-pivot caliper by its two separate pivots and the cable noodle, but flagged as a confusable pair with `rim_brake_caliper`. (3) Covered by a Shimano dealer's manual: **not yet confirmed**. The V-brake manual code must be found on si.shimano.com in a browser and entered in the table; until then this amendment cannot be Accepted.
+**Against the admission criteria.** (1) A brake component: yes. (2) Visually distinct from a dual-pivot caliper by its two separate pivots and the cable noodle, but flagged as a confusable pair with `rim_brake_caliper`. (3) Covered by a Shimano dealer's manual: yes, DM-GN0001 (General Operations), whose V-BRAKE installation section was opened and confirmed in a browser on 2026-11-16. Shimano publishes no V-brake-only dealer's manual: the BR-T4000 and BR-T610 calipers have a user's manual (UM-8W20A) only, and DM-RCBR001 covers cantilever brakes, which stay out of scope.
 
 **Relabelling.** None needed: annotation (T-310) has not started. Six photos of b01 that had been sorted into `rim_brake_caliper` are moved to `v_brake`, since they show V-brakes.
 
-**Consequences.** The corpus (T-203) indexes the V-brake dealer's manual once its code is confirmed, and its `classes` column in `docs/corpus/provenance.csv` gains `v_brake` (also for DM-TORQUE). The capture plan adds `v_brake` and its look-alike pair.
+**Consequences.** The corpus (T-203) adds DM-GN0001, which it does not hold yet, with `v_brake` in its `classes` column in `docs/corpus/provenance.csv`; DM-TORQUE's row gains `v_brake` too. The capture plan adds `v_brake` and its look-alike pair.
 
 ## Open items before this ADR moves to Accepted
 
 - [ ] Manual codes opened and confirmed in a browser, one per class
-- [ ] V-brake dealer's manual code found and entered for class 12 (Amendment 1)
+- [x] V-brake dealer's manual code found and entered for class 12 (Amendment 1): DM-GN0001
 - [ ] Example photo recorded for each class after the first capture session
 - [ ] PR approved by every decider
 
