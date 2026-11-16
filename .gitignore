@@ -26,6 +26,9 @@ data/
 *.onnx
 *.pdf
 
+# Raw benchmark answers. The .md summaries beside them are the record.
+bench/results/*.json
+
 # Editors and OS
 .vscode/
 .idea/

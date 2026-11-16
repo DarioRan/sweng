@@ -9,6 +9,12 @@ minio==7.2.20                # generic S3 client, used against SeaweedFS
 python-multipart==0.0.32
 httpx==0.28.1
 
+# Corpus ingestion (T-203b)
+pypdf[crypto]==6.19.0        # text from the manual PDFs; crypto opens print-restricted ones
+fastembed==0.8.1             # runs EMBEDDER_MODEL on ONNX, no PyTorch; qdrant-client 1.19 wants 0.8.x
+                             # (it also brings tokenizers and Pillow, which ingestion uses)
+pypdfium2==5.13.0            # renders pages, to crop the figures out of them
+
 # Development and CI (T-305)
 pytest==9.1.1
 ruff==0.16.8
