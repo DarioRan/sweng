@@ -20,7 +20,7 @@ The plan fixes what `/ask` must guarantee (§1.3):
 
 These are enforced by code outside the language model, so that the safety claim does not depend on the model behaving well.
 
-All measurements are on `bench/ask_questions.json`: 41 questions the manuals answer, with the pages that hold the answer found by reading the manuals, and 28 they do not answer (out of scope, other brands, parts that do not exist, facts a manual does not give). Every third question of each kind is held out as a test split: 13 answerable and 9 unanswerable. Choices are made on the other 47 and reported on both.
+All measurements are on the 27 manuals indexed on 2026-11-16, before DM-GN0001 (V-brakes, ADR 0002 Amendment 1) was added to the corpus, and on `bench/ask_questions.json`: 41 questions the manuals answer, with the pages that hold the answer found by reading the manuals, and 28 they do not answer (out of scope, other brands, parts that do not exist, facts a manual does not give). Every third question of each kind is held out as a test split: 13 answerable and 9 unanswerable. Choices are made on the other 47 and reported on both.
 
 ## The pipeline
 
@@ -217,4 +217,5 @@ Against milestone M1, "a question against the indexed corpus returns a cited, at
 7. **Should Ollama start with the default stack?** `/ask` needs it; it adds a 3 GB image and a 3.3 GB model to every clean checkout (NFR-04). Left to the team.
 8. **The margin of decision 3** waits for the detector.
 9. **Not part of this ADR:** saving answers to the session (T-407), authentication on the endpoint (T-402), the frontend.
-10. **Before Accepted**, a decider reruns `app.rag.calibrate` and `app.rag.evaluate` (`bench/README.md`) and checks the tables above.
+10. **V-brakes are not measured.** DM-GN0001 and class 12 arrived after these runs. Index it, add V-brake questions to `bench/ask_questions.json`, and rerun both tests; the threshold may move.
+11. **Before Accepted**, a decider reruns `app.rag.calibrate` and `app.rag.evaluate` (`bench/README.md`) and checks the tables above.

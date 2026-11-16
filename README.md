@@ -107,6 +107,7 @@ infra/postgres/init/   SQL run once on an empty database volume
 bench/                 the labelled questions and the three tests of /ask, with results
 docs/adr/              decision records (docs/adr/README.md)
 docs/ask-pipeline.md   how /ask answers, stage by stage, with examples
+docs/sprint-3-4-summary.md  what Sprints 3–4 delivered, in one page
 docker-compose.gpu.yml optional NVIDIA GPU for Ollama
 ```
 

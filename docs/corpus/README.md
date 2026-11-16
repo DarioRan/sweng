@@ -75,9 +75,11 @@ docker compose --profile ingest run --rm ingest python -m app.corpus.ingest --qu
 
 ### State on 2026-11-16
 
+Measured before DM-GN0001 was added. Download it into `data/manuals/` and re-index: until then the ingestion reports it as `MISSING` and exits with an error, though the other 27 are indexed normally.
+
 | | |
 |---|---|
-| Manuals indexed | 27 of 27 |
+| Manuals indexed | 27 of 28: DM-GN0001 (V-brake, added 2026-11-16) is recorded but was not yet downloaded where this was measured |
 | Pages | 945, each also stored as a page render |
 | Chunks | 982 |
 | Figures stored | 1,373, on 648 pages |

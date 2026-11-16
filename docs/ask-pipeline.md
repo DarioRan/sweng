@@ -167,7 +167,7 @@ This is the failure the checks cannot catch: a real value, really printed on the
 
 ## The numbers
 
-69 labelled questions: 41 that the manuals answer, 28 that they do not (out of scope, other brands, parts that do not exist, facts a manual does not give). With `qwen3.5:4b`, two page images, threshold 0.75, on 2026-11-16:
+Measured on the 27 manuals indexed before DM-GN0001 (V-brakes) was added. 69 labelled questions: 41 that the manuals answer, 28 that they do not (out of scope, other brands, parts that do not exist, facts a manual does not give). With `qwen3.5:4b`, two page images, threshold 0.75, on 2026-11-16:
 
 | | All 69 | The 22 held out from calibration |
 |---|---|---|
@@ -225,4 +225,5 @@ Rule 2 belongs to the detector and Rule 6 to the frontend.
 3. **A procedure that runs over several pages** may come back with only the steps of the pages retrieved.
 4. **The professional-only list is empty.** The mechanism works and is tested, but the Shimano manuals do not mark single procedures as dealer-only, so which work to stop is the team's decision (T-503, US-27).
 5. **The threshold has a thin margin.** Answerable questions scored 0.74 to 0.88 and unanswerable ones 0.54 to 0.76. The two layers behind the gate, the model's own abstention and the check, exist because of that overlap.
-6. **Nothing is stored.** The answer is returned, not saved to the session (T-407).
+6. **V-brakes are not covered yet.** Their manual, DM-GN0001, was added to the corpus record after these measurements, and no question asks about them.
+7. **Nothing is stored.** The answer is returned, not saved to the session (T-407).

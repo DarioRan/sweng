@@ -5,7 +5,7 @@ One file per decision that would be expensive to change later. Each says what wa
 | No. | Decision | In one sentence | Status |
 |---|---|---|---|
 | [0001](0001-public-bicycle-datasets.md) | Public bicycle datasets | DelftBikes is adopted for pretraining only and BIKED is rejected; the detector is trained on our own photographs. | Proposed |
-| [0002](0002-component-class-list.md) | The component class list | Eleven drivetrain and brake classes, frozen as the annotation schema and the labels `/api/detect` returns. | Proposed |
+| [0002](0002-component-class-list.md) | The component class list | Twelve drivetrain and brake classes (eleven frozen, `v_brake` added by Amendment 1), the annotation schema and the labels `/api/detect` returns. | Proposed |
 | [0003](0003-local-llm.md) | The local language model | `qwen3.5:4b` through Ollama: it abstains when the passages hold no answer, reads page images, and is Apache 2.0. | Proposed |
 | [0004](0004-ask-pipeline.md) | How `/ask` answers | Text search scoped by the part named, an abstention gate before any model call, a hazard list, one manual per model call, and a check of every value against the cited page. | Proposed |
 
