@@ -119,3 +119,7 @@ Phone settings: normal photo mode, no portrait/blur, no filters, no zoom. On an 
 To create the empty raw folders for a new bike: `python3 -c "import json,pathlib; [pathlib.Path('data/raw/b05',c['name']).mkdir(parents=True,exist_ok=True) for c in json.load(open('backend/app/vision/categories.json'))['categories']]"`
 
 Videos (15-second sweeps around a part) stay in `data/raw/` for now; frames are extracted later and prepared the same way.
+
+## Annotation
+
+Boxes are drawn in Label Studio and stored as one COCO file per bike in `annotations/`. The rules and the step-by-step process are in [ANNOTATION.md](ANNOTATION.md).
