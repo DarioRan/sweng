@@ -1,0 +1,24 @@
+# Calibration set (ANNOTATION.md, step 2): all four annotators label these ten photos.
+# Chosen for the boundary cases the guide has to settle. Set up with:
+#   python3 datasets/components/annotations.py setup --list datasets/components/annotations/calibration.txt
+#
+# chain far away, mostly behind the chain guard: one box per visible run?
+images/b01/chain/b01_chain_001.jpg
+# single sprocket on a hub gear: cassette or not?
+images/b01/cassette/b01_cassette_001.jpg
+# V-brake from the side, mudguard in front of the arms
+images/b01/v_brake/b01_v_brake_004.jpg
+# front derailleur over three chainrings: where crankset and derailleur boxes meet
+images/b02/front_derailleur/b02_front_derailleur_003.jpg
+# rear derailleur from far, behind spokes, cassette and chain in view
+images/b02/rear_derailleur/b02_rear_derailleur_007.jpg
+# crank spider close-up: crankset and bottom bracket boxes overlap
+images/b02/bottom_bracket/b02_bottom_bracket_001.jpg
+# bottom bracket from below, chainrings in front: is the cup visible enough?
+images/b02/bottom_bracket/b02_bottom_bracket_002.jpg
+# pedal on its crank arm with the chainrings: pedal box ends where?
+images/b02/pedal/b02_pedal_003.jpg
+# grip shifter and brake lever together: one shift_brake_lever box or two?
+images/b02/shift_brake_lever/b02_shift_brake_lever_004.jpg
+# V-brake from the front: both arms and the noodle in one box
+images/b02/v_brake/b02_v_brake_002.jpg

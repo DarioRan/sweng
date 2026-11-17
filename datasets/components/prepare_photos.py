@@ -10,11 +10,12 @@ images/<bike>/<class>/, plus one row per photo in captures.csv.
 Usage, from the repository root:
 
     python datasets/components/prepare_photos.py data/raw/b01 --bike b01
-    python datasets/components/prepare_photos.py data/raw/b04 --bike b04 --split test
+    python datasets/components/prepare_photos.py data/raw/b10 --bike b10 --split test
 
-Photos are taken in recipe order (shots 1-10, see README), so the shot number
-fills in angle, distance, occlusion and light. Running it again skips photos
-that are already prepared.
+Angle, distance, occlusion and light are left blank: describe_photos.py fills
+them in from the photos. Pass --recipe only if the photos were taken exactly in
+the README's 10-shot order, so the shot number tells the angle. Running it again
+skips photos that are already prepared.
 """
 
 import argparse
@@ -34,10 +35,10 @@ SUFFIXES = {".jpg", ".jpeg", ".png"}
 
 FIELDS = [
     "file_name", "bike", "split", "main_class", "shot", "angle", "distance",
-    "occlusion", "light", "device", "taken_at", "source_file", "notes",
+    "occlusion", "light", "metadata_source", "device", "taken_at", "source_file", "notes",
 ]
 
-# shot -> (angle, distance, occlusion, light); the 10-shot recipe in README.md
+# shot -> (angle, distance, occlusion, light); the 10-shot recipe in README.md, used with --recipe
 RECIPE = {
     1: ("side", "close", "none", "normal"),
     2: ("side", "far", "none", "normal"),
@@ -79,7 +80,11 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("raw_dir", type=Path, help="one bike's raw folder, a subfolder per class")
     parser.add_argument("--bike", required=True, help="bike id, e.g. b01")
-    parser.add_argument("--split", choices=["train", "test"], default="train")
+    parser.add_argument("--split", choices=["train", "val", "test"], default="train")
+    parser.add_argument(
+        "--recipe", action="store_true",
+        help="photos follow the README's 10-shot order: fill in angles from the shot number",
+    )
     args = parser.parse_args()
 
     if not re.fullmatch(r"b\d{2}", args.bike):
@@ -105,12 +110,14 @@ def main() -> None:
                 skipped += 1
                 continue
             device, taken = prepare(src, dst)
-            angle, distance, occlusion, light = RECIPE.get(shot, ("", "", "", ""))
+            recipe = RECIPE.get(shot) if args.recipe else None
+            angle, distance, occlusion, light = recipe or ("", "", "", "")
             rows.append({
                 "file_name": f"images/{args.bike}/{folder.name}/{name}", "bike": args.bike,
                 "split": args.split, "main_class": folder.name, "shot": shot,
                 "angle": angle, "distance": distance, "occlusion": occlusion,
-                "light": light, "device": device, "taken_at": taken,
+                "light": light, "metadata_source": "recipe" if recipe else "",
+                "device": device, "taken_at": taken,
                 "source_file": src.name, "notes": "",
             })
 
