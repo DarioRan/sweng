@@ -36,9 +36,9 @@ from app.contracts import (
     Provenance,
     TranscribeResponse,
 )
+from app.rag.service import get_pipeline
 from app.security import require_roles
 from app.users import Role
-from app.rag.service import get_pipeline
 
 router = APIRouter(prefix="/api", tags=["contracts"])
 
