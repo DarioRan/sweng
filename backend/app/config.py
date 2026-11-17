@@ -38,7 +38,7 @@ class Settings(BaseSettings):
     retrieval_scorer: str = "dense"  # ADR 0004
     model_cache_dir: str | None = None  # fastembed's cache; FASTEMBED_CACHE_PATH also works
     ask_page_images: int = 2  # page renders sent to the model with the passages
-    detector_weights: str = "/models/detector.pt"
+    detector_weights: str = "/models/detector.onnx"  # training/detector/train.py
 
     # Thresholds behind Rules 1 and 2 (§1.3).
     detector_confidence_threshold: float = 0.6  # placeholder until T-502

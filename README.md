@@ -63,6 +63,22 @@ one to two seconds, against ten or more on a CPU.
 On a machine with a small disk quota, set the `*_DATA` variables in `.env` to keep the
 index, the objects and the model weights in the project folder (`.env.example`).
 
+### The whole prototype: photo to cited answer
+
+The web app at http://localhost:5173 takes a photo, finds the part, and answers from the
+manuals. On top of the three steps above, it needs the detector's weights:
+
+```sh
+echo "MODEL_CACHE=./models" >> .env                  # the backend reads ./models as /models
+python3 training/detector/prepare.py                 # annotations -> data/yolo/
+python3 training/detector/train.py                   # -> models/detector.onnx (needs ultralytics; see training/detector/README.md)
+docker compose -f docker-compose.yml -f docker-compose.gpu.yml --profile local up -d
+```
+
+Then, in the app: start a repair, photograph the part (or choose it by name), confirm it,
+and ask. Below the detector's threshold, the app shows candidates instead of naming a
+part (Rule 2); outside the manuals, it says so (Rule 1).
+
 ### Measuring it
 
 Three tests, all described in [bench/README.md](bench/README.md):

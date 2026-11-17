@@ -144,7 +144,7 @@ services:
       RETRIEVAL_CONFIDENCE_THRESHOLD: ${RETRIEVAL_CONFIDENCE_THRESHOLD:-0.75}  # ADR 0004
       FASTEMBED_CACHE_PATH: /models/fastembed
       HF_HUB_DISABLE_XET: "1"
-      DETECTOR_WEIGHTS: ${DETECTOR_WEIGHTS:-/models/detector.pt}
+      DETECTOR_WEIGHTS: ${DETECTOR_WEIGHTS:-/models/detector.onnx}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
       # Bind mounts from Windows/macOS hosts do not deliver inotify events;
       # polling makes --reload work on every platform (NFR-01).
