@@ -1,11 +1,9 @@
-"""The five §5.2 endpoints, as typed stubs.
+"""The five §5.2 endpoints.
 
-Each returns 501 with the contract it will honour, so the frontend and the
-tests can be written against real shapes now and swapped for behaviour later:
-detect (T-201/T-208), figure (T-207), transcribe (T-403/T-406), documents (T-203b).
-
-/ask is implemented (app/rag/, ADR 0003 and 0004). /figures/{key} serves the figure or
-page image a citation names.
+/detect (app/vision/detector.py, T-201) and /ask (app/rag/, ADR 0003 and 0004) are
+implemented; /figures/{key} serves the figure or page image a citation names. The others
+return 501 with the contract they will honour: figure (T-207), transcribe (T-403/T-406),
+documents (T-203b).
 """
 
 import asyncio
@@ -24,11 +22,14 @@ from fastapi import (
     status,
 )
 from minio.error import S3Error
+from PIL import UnidentifiedImageError
 from qdrant_client.http.exceptions import ResponseHandlingException, UnexpectedResponse
 
 from app.contracts import (
     AskRequest,
     AskResponse,
+    BoundingBox,
+    Detection,
     DetectResponse,
     DocumentUploadResponse,
     FigureKind,
@@ -39,6 +40,7 @@ from app.contracts import (
 from app.rag.service import get_pipeline
 from app.security import require_roles
 from app.users import Role
+from app.vision.detector import Detector, DetectorUnavailable
 
 router = APIRouter(prefix="/api", tags=["contracts"])
 
@@ -51,12 +53,51 @@ _NOT_IMPLEMENTED = HTTPException(
 )
 
 
+MAX_PHOTO_BYTES = 10 * 1024 * 1024  # the client compresses to 2 MB (T-403); this is a guard
+
+
+def get_detector(request: Request) -> Detector:
+    detector = getattr(request.app.state, "detector", None)
+    if detector is None:
+        detector = Detector(request.app.state.stores.settings.detector_weights)
+        request.app.state.detector = detector
+    return detector
+
+
 @router.post("/detect", response_model=DetectResponse, dependencies=REPAIR)
 async def detect(
     image: Annotated[UploadFile, File()],
     job_id: Annotated[str, Form()],
+    request: Request,
 ) -> DetectResponse:
-    raise _NOT_IMPLEMENTED
+    """The components in a photo, best first (T-201, Rule 2).
+
+    Every candidate above a low floor is listed. `above_threshold` says whether the best one
+    clears DETECTOR_CONFIDENCE_THRESHOLD: only then may the client name it or draw it.
+    Below, the client shows the candidates with none selected, and search by name.
+    """
+    data = await image.read(MAX_PHOTO_BYTES + 1)
+    if len(data) > MAX_PHOTO_BYTES:
+        raise HTTPException(status.HTTP_413_CONTENT_TOO_LARGE, "photo over 10 MB")
+    threshold = request.app.state.stores.settings.detector_confidence_threshold
+    try:
+        boxes, _, _ = await asyncio.to_thread(get_detector(request).detect, data)
+    except DetectorUnavailable as err:
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, str(err)) from err
+    except UnidentifiedImageError as err:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "not an image") from err
+    detections = [
+        Detection(
+            label=b.label,
+            box=BoundingBox(x=b.x, y=b.y, width=b.width, height=b.height),
+            score=b.score,
+        )
+        for b in boxes
+    ]
+    return DetectResponse(
+        detections=detections,
+        above_threshold=bool(detections) and detections[0].score >= threshold,
+    )
 
 
 @router.post("/ask", response_model=AskResponse, dependencies=REPAIR)

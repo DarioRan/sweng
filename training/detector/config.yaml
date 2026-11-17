@@ -1,0 +1,22 @@
+# Detector training run (T-201, #24). Committed so a run can be repeated exactly.
+# Read by train.py; every key except `base` is passed to ultralytics' train().
+
+base: yolo11s.pt          # COCO-pretrained weights (ADR 0001: the COCO-only run)
+
+epochs: 150
+patience: 40              # stop when val mAP has not improved for this many epochs
+imgsz: 960                # photos are 1200x1600; parts like the chain and bottom bracket are thin
+batch: 8
+seed: 16
+deterministic: true
+optimizer: AdamW
+lr0: 0.001
+cos_lr: true
+
+# Augmentation. Phone photos are taken at any angle and in any light; left-right flips
+# keep every class's meaning (a drive-side crank flipped is still a crankset).
+fliplr: 0.5
+degrees: 10
+hsv_v: 0.4
+mosaic: 1.0
+close_mosaic: 20
