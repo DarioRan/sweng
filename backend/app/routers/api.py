@@ -12,7 +12,17 @@ import asyncio
 from typing import Annotated
 
 import httpx
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Response, UploadFile, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Request,
+    Response,
+    UploadFile,
+    status,
+)
 from minio.error import S3Error
 from qdrant_client.http.exceptions import ResponseHandlingException, UnexpectedResponse
 
