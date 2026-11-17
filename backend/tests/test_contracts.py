@@ -7,6 +7,8 @@ from app.contracts import AnswerStatus, AskResponse
 from app.main import app
 from app.users import Role
 
+QUESTION = {"question": "torque?", "job_id": "j1"}
+
 
 def test_openapi_lists_the_five_contracts() -> None:
     with TestClient(app) as client:
@@ -22,9 +24,10 @@ def test_ask_answers_in_the_contract_shape(client: TestClient, auth_header) -> N
         async def ask(self, question: str, component: str | None = None):
             return AskResponse(status=AnswerStatus.abstained, confidence=0.1, stop_reason="x"), None
 
-    with TestClient(app) as client:
-        app.state.ask_pipeline = Abstains()
-        response = client.post("/api/ask", json={"question": "torque?", "job_id": "j1"})
+    app.state.ask_pipeline = Abstains()
+    try:
+        response = client.post("/api/ask", headers=auth_header(Role.owner), json=QUESTION)
+    finally:
         del app.state.ask_pipeline
     assert response.status_code == 200
     assert response.json()["status"] == "abstained"
@@ -35,14 +38,17 @@ def test_ask_rejects_malformed_request(client: TestClient, auth_header) -> None:
     assert response.status_code == 422
 
 
-def test_ask_says_what_to_start_when_the_model_is_not_running() -> None:
+def test_ask_says_what_to_start_when_the_model_is_not_running(
+    client: TestClient, auth_header
+) -> None:
     class Unreachable:
         async def ask(self, question: str, component: str | None = None):
             raise httpx.ConnectError("connection refused")
 
-    with TestClient(app) as client:
-        app.state.ask_pipeline = Unreachable()
-        response = client.post("/api/ask", json={"question": "torque?", "job_id": "j1"})
+    app.state.ask_pipeline = Unreachable()
+    try:
+        response = client.post("/api/ask", headers=auth_header(Role.owner), json=QUESTION)
+    finally:
         del app.state.ask_pipeline
     assert response.status_code == 503
     assert "docker compose --profile local up" in response.json()["detail"]

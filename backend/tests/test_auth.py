@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
 from app.config import Settings, get_settings
+from app.contracts import AnswerStatus, AskResponse
 from app.main import app
 from app.security import hash_password, verify_password
 from app.users import InMemoryUserStore, Role
@@ -16,7 +17,23 @@ from tests.conftest import PASSWORD
 
 AuthHeader = Callable[[Role], dict[str, str]]
 
-PUBLIC = {"/api/auth/login", "/api/auth/register"}
+
+class Abstains:
+    """Stands in for the /ask pipeline, so these tests need no index or language model."""
+
+    async def ask(self, question: str, component: str | None = None):
+        return AskResponse(status=AnswerStatus.abstained, confidence=0.1, stop_reason="x"), None
+
+
+@pytest.fixture
+def ask_stub(client: TestClient) -> Iterator[None]:
+    app.state.ask_pipeline = Abstains()
+    yield
+    del app.state.ask_pipeline
+
+# /figures/{key} stays open: the client shows figures with <img src>, which cannot send a
+# bearer token, and they are pages of public manuals, not user data.
+PUBLIC = {"/api/auth/login", "/api/auth/register", "/api/figures/{key}"}
 ASK = {"question": "torque?", "job_id": "j1"}
 DOCUMENT = {
     "files": {"pdf": ("m.pdf", b"%PDF-1.4", "application/pdf")},
@@ -176,19 +193,26 @@ def test_wrong_role_is_rejected(
 
 
 @pytest.mark.parametrize(
-    "role,method,path,kwargs",
+    "role,method,path,kwargs,expected",
     [
-        (Role.owner, "POST", "/api/ask", {"json": ASK}),
-        (Role.technician, "POST", "/api/ask", {"json": ASK}),
-        (Role.technician, "GET", "/api/figure?component=chain", {}),
-        (Role.administrator, "POST", "/api/documents", DOCUMENT),
+        (Role.owner, "POST", "/api/ask", {"json": ASK}, 200),
+        (Role.technician, "POST", "/api/ask", {"json": ASK}, 200),
+        (Role.technician, "GET", "/api/figure?component=chain", {}, 501),
+        (Role.administrator, "POST", "/api/documents", DOCUMENT, 501),
     ],
 )
 def test_right_role_reaches_the_endpoint(
-    client: TestClient, auth_header: AuthHeader, role: Role, method: str, path: str, kwargs: dict
+    client: TestClient,
+    auth_header: AuthHeader,
+    ask_stub: None,
+    role: Role,
+    method: str,
+    path: str,
+    kwargs: dict,
+    expected: int,
 ) -> None:
     response = client.request(method, path, headers=auth_header(role), **kwargs)
-    assert response.status_code == 501  # past the role check, into the stub
+    assert response.status_code == expected  # past the role check: the route's own answer
 
 
 def test_administrator_creates_a_technician(client: TestClient, auth_header: AuthHeader) -> None:
@@ -224,9 +248,9 @@ def test_bypass_refused_outside_development(env: str) -> None:
 
 
 def test_bypass_lets_tokenless_requests_through_every_role(
-    client: TestClient, auth_disabled: None
+    client: TestClient, auth_disabled: None, ask_stub: None
 ) -> None:
-    assert client.post("/api/ask", json=ASK).status_code == 501
+    assert client.post("/api/ask", json=ASK).status_code == 200
     assert client.post("/api/documents", **DOCUMENT).status_code == 501
 
 
