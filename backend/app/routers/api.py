@@ -10,7 +10,17 @@ import asyncio
 from typing import Annotated
 
 import httpx
-from fastapi import APIRouter, File, Form, HTTPException, Request, Response, UploadFile, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    Request,
+    Response,
+    UploadFile,
+    status,
+)
 from minio.error import S3Error
 from PIL import UnidentifiedImageError
 from qdrant_client.http.exceptions import ResponseHandlingException, UnexpectedResponse
@@ -28,9 +38,14 @@ from app.contracts import (
     TranscribeResponse,
 )
 from app.rag.service import get_pipeline
+from app.security import require_roles
+from app.users import Role
 from app.vision.detector import Detector, DetectorUnavailable
 
 router = APIRouter(prefix="/api", tags=["contracts"])
+
+REPAIR = [Depends(require_roles(Role.owner, Role.technician))]
+CORPUS = [Depends(require_roles(Role.administrator))]
 
 _NOT_IMPLEMENTED = HTTPException(
     status_code=status.HTTP_501_NOT_IMPLEMENTED,
@@ -49,7 +64,7 @@ def get_detector(request: Request) -> Detector:
     return detector
 
 
-@router.post("/detect", response_model=DetectResponse)
+@router.post("/detect", response_model=DetectResponse, dependencies=REPAIR)
 async def detect(
     image: Annotated[UploadFile, File()],
     job_id: Annotated[str, Form()],
@@ -85,7 +100,7 @@ async def detect(
     )
 
 
-@router.post("/ask", response_model=AskResponse)
+@router.post("/ask", response_model=AskResponse, dependencies=REPAIR)
 async def ask(body: AskRequest, request: Request) -> AskResponse:
     """Answer from the manuals only, with citations, or abstain (Rules 1, 3, 4).
 
@@ -131,17 +146,17 @@ async def figure_image(key: str, request: Request) -> Response:
     return Response(data, media_type="image/png")
 
 
-@router.get("/figure", response_model=FigureResponse)
+@router.get("/figure", response_model=FigureResponse, dependencies=REPAIR)
 async def figure(component: str, kind: FigureKind = FigureKind.exploded) -> FigureResponse:
     raise _NOT_IMPLEMENTED
 
 
-@router.post("/transcribe", response_model=TranscribeResponse)
+@router.post("/transcribe", response_model=TranscribeResponse, dependencies=REPAIR)
 async def transcribe(audio: Annotated[UploadFile, File()]) -> TranscribeResponse:
     raise _NOT_IMPLEMENTED
 
 
-@router.post("/documents", response_model=DocumentUploadResponse)
+@router.post("/documents", response_model=DocumentUploadResponse, dependencies=CORPUS)
 async def upload_document(
     pdf: Annotated[UploadFile, File()],
     source: Annotated[str, Form()],

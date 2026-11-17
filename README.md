@@ -91,6 +91,44 @@ docker compose --profile ingest --profile local run --rm -v "$PWD/bench:/bench" 
     python -m app.rag.evaluate /bench/ask_questions.json                                        # the whole pipeline
 ```
 
+### Accounts and roles
+
+Three roles: `owner`, `technician`, `administrator`. The server checks them on
+every `/api` endpoint; hiding a button in the client is not the control.
+
+| Endpoint                                    | Roles                 |
+| ------------------------------------------- | --------------------- |
+| `POST /api/auth/register`, `/api/auth/login` | anyone (sign-up makes an owner) |
+| `GET /api/auth/me`                          | any signed-in user    |
+| `/api/detect`, `/ask`, `/figure`, `/transcribe` | owner, technician |
+| `POST /api/documents`, `POST /api/admin/users` | administrator      |
+
+To work without signing in, set `AUTH_DISABLED=true` in `.env` and restart the
+backend. Requests without a token then pass every role check; requests with a
+token are still checked, so roles can still be tested. Development only: the
+backend refuses to start with it under any other `APP_ENV`.
+
+In development (`APP_ENV=development`, the default) the stack creates one demo
+account per role on start, all with password `password123`:
+
+| Email                 | Role          |
+| --------------------- | ------------- |
+| `owner@test.com`      | owner         |
+| `technician@test.com` | technician    |
+| `admin@test.com`      | administrator |
+
+The seed refuses to run under any other `APP_ENV`, so these never reach a real
+database.
+
+Sign-in returns a bearer token (HS256 JWT signed with `SECRET_KEY`, valid for
+`ACCESS_TOKEN_TTL_MINUTES`). Passwords are stored as Argon2id hashes. Outside
+development, create the first administrator from the command line; they can
+create the rest over the API:
+
+```sh
+docker compose exec backend python -m app.create_user admin@example.com administrator
+```
+
 ### Everyday commands
 
 ```sh
@@ -111,12 +149,17 @@ docker-compose.yml     the stack (T-304)
 backend/               FastAPI service layer (§5)
   app/config.py        settings from the environment
   app/stores.py        PostgreSQL / Qdrant / S3 clients and probes
+  app/users.py         accounts and the three roles (T-402)
+  app/security.py      Argon2id hashing, signed tokens, server-side role check
+  app/seed_users.py    demo account per role, development only
   app/contracts.py     the five interface contracts (§5.2, T-202)
   app/routers/api.py   /api/ask (implemented); /detect, /figure, /transcribe, /documents (stubs)
   app/vision/          frozen component classes, COCO schema (T-306, ADR 0002)
   app/corpus/          manuals to chunks in Qdrant: parse, chunk, embed, index (T-203b)
   app/rag/             /ask: search, abstention gate, safety gate, model, grounding check
   app/rag/hazards.json the hazard list (Rule 3, T-503)
+  app/routers/api.py   /api/detect, /ask, /figure, /transcribe, /documents
+  app/routers/auth.py  /api/auth/login, /register, /me, /api/admin/users
   tests/               contract shapes and the /ask pipeline, no stores or models needed
 frontend/              phone-first web client (Vite + React)
 infra/postgres/init/   SQL run once on an empty database volume

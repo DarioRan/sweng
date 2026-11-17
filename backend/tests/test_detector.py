@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 from PIL import Image
 
 from app.main import app
+from app.users import Role
 from app.vision.detector import Box, Detector, DetectorUnavailable, decode, letterbox, load_labels
 
 LABELS = load_labels()
@@ -74,18 +75,27 @@ class FakeDetector:
         return self.boxes, 64, 48
 
 
-def post(detector, data: bytes):
-    with TestClient(app) as client:
-        app.state.detector = detector
-        try:
-            return client.post(
-                "/api/detect", files={"image": ("p.jpg", data)}, data={"job_id": "j1"}
-            )
-        finally:
-            del app.state.detector
+@pytest.fixture
+def post(auth_header):
+    """POST /api/detect signed in (owner by default), with the given detector behind it."""
+
+    def send(detector, data: bytes, role: Role = Role.owner):
+        with TestClient(app) as client:
+            app.state.detector = detector
+            try:
+                return client.post(
+                    "/api/detect",
+                    files={"image": ("p.jpg", data)},
+                    data={"job_id": "j1"},
+                    headers=auth_header(role),
+                )
+            finally:
+                del app.state.detector
+
+    return send
 
 
-def test_detect_names_the_part_only_above_the_threshold() -> None:
+def test_detect_names_the_part_only_above_the_threshold(post) -> None:
     boxes = [Box("pedal", 1, 2, 30, 20, 0.92), Box("chain", 0, 0, 9, 9, 0.3)]
     sure = post(FakeDetector(boxes), jpeg())
     assert sure.status_code == 200
@@ -102,6 +112,11 @@ def test_detect_names_the_part_only_above_the_threshold() -> None:
     assert nothing == {"detections": [], "above_threshold": False}
 
 
-def test_detect_explains_missing_weights_and_bad_images() -> None:
+def test_detect_is_for_owners_and_technicians(post) -> None:
+    assert post(FakeDetector([]), jpeg(), Role.technician).status_code == 200
+    assert post(FakeDetector([]), jpeg(), Role.administrator).status_code == 403
+
+
+def test_detect_explains_missing_weights_and_bad_images(post) -> None:
     assert post(Detector("/nonexistent/detector.onnx"), jpeg()).status_code == 503
     assert post(FakeDetector([]), b"not a photo").status_code == 422

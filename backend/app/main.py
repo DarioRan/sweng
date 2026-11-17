@@ -1,5 +1,6 @@
 """FastAPI entry point — the single service-layer process from §5."""
 
+import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -8,14 +9,20 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.config import get_settings
-from app.routers import api
+from app.routers import api, auth
 from app.stores import Stores
+from app.users import SqlUserStore
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
     app.state.stores = Stores.from_settings(settings)
+    app.state.users = SqlUserStore(app.state.stores.db)
+    if settings.auth_disabled:
+        logging.getLogger("uvicorn.error").warning(
+            "AUTH_DISABLED=true: requests without a token pass every role check"
+        )
     try:
         yield
     finally:
@@ -36,6 +43,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth.router)
 app.include_router(api.router)
 
 
