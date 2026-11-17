@@ -1,0 +1,739 @@
+{
+  "about": "Test cases for bench/run.py. Every part code, manual code and value in this file is INVENTED. None of it is Shimano data and none of it may be used for a real repair. The values are invented on purpose: a model cannot know them, so a correct answer proves it read the passage instead of answering from memory.",
+  "cases": [
+    {
+      "id": "fact-01",
+      "category": "fact",
+      "question": "What torque do I use for the bolt that mounts my RD-ZX70 rear derailleur to the frame?",
+      "passages": [
+        {
+          "id": "P1",
+          "source": "TEST-RD-01, page 14",
+          "text": "RD-ZX50 - Installation to the frame. Fit the bracket axle to the derailleur hanger and tighten it with a 5 mm hexagon wrench. Tightening torque: 6-7 N·m."
+        },
+        {
+          "id": "P2",
+          "source": "TEST-RD-02, page 16",
+          "text": "RD-ZX70 - Installation to the frame. Fit the bracket axle to the derailleur hanger and tighten it with a 5 mm hexagon wrench. Tightening torque: 9-11 N·m."
+        },
+        {
+          "id": "P3",
+          "source": "TEST-RD-02, page 21",
+          "text": "RD-ZX70 - Securing the inner cable. Pull the inner cable taut, then tighten the cable fixing bolt with a 4 mm hexagon wrench. Tightening torque: 5-6 N·m."
+        }
+      ],
+      "expect": {
+        "status": "answered",
+        "must_include": [
+          "9-11"
+        ],
+        "must_exclude": [
+          "6-7"
+        ],
+        "cite": [
+          "P2"
+        ]
+      }
+    },
+    {
+      "id": "fact-02",
+      "category": "fact",
+      "question": "How tight should the lockring be on a CS-ZX12 cassette?",
+      "passages": [
+        {
+          "id": "P1",
+          "source": "TEST-CS-01, page 5",
+          "text": "CS-ZX12 - Compatibility. Use only with the 12-speed chain CN-ZX12. Largest sprocket: 51T. Smallest sprocket: 10T."
+        },
+        {
+          "id": "P2",
+          "source": "TEST-FC-01, page 9",
+          "text": "FC-ZX80 - Left crank arm. Tighten the two crank arm fixing bolts alternately, a little at a time. Tightening torque: 12-14 N·m."
+        },
+        {
+          "id": "P3",
+          "source": "TEST-CS-01, page 8",
+          "text": "CS-ZX12 - Installation. Slide the sprockets onto the freehub body, lining up the wide spline. Tighten the lockring with the tool TL-ZX10. Tightening torque: 35-45 N·m."
+        }
+      ],
+      "expect": {
+        "status": "answered",
+        "must_include": [
+          "35-45"
+        ],
+        "must_exclude": [
+          "12-14"
+        ],
+        "cite": [
+          "P3"
+        ]
+      }
+    },
+    {
+      "id": "fact-03",
+      "category": "fact",
+      "question": "At what thickness do I have to replace my RT-ZX30 disc rotor?",
+      "passages": [
+        {
+          "id": "P1",
+          "source": "TEST-RT-01, page 6",
+          "text": "RT-ZX30 - Wear. A new rotor is 1.9 mm thick. If the rotor has worn down to 1.6 mm or less, or if the aluminum core becomes visible, stop riding and replace the rotor."
+        },
+        {
+          "id": "P2",
+          "source": "TEST-RT-01, page 4",
+          "text": "RT-ZX30 - Installation (center lock). Fit the rotor on the hub and tighten the rotor lockring with the tool TL-ZX10. Tightening torque: 38-42 N·m."
+        },
+        {
+          "id": "P3",
+          "source": "TEST-BR-01, page 11",
+          "text": "BR-ZX40 - Pad wear. Replace both brake pads when the pad material is 0.6 mm thick or less."
+        }
+      ],
+      "expect": {
+        "status": "answered",
+        "must_include": [
+          "1.6"
+        ],
+        "must_exclude": [
+          "0.6"
+        ],
+        "cite": [
+          "P1"
+        ]
+      }
+    },
+    {
+      "id": "fact-04",
+      "category": "fact",
+      "question": "How many links do I add when sizing a new CN-ZX12 chain?",
+      "passages": [
+        {
+          "id": "P1",
+          "source": "TEST-CN-01, page 7",
+          "text": "CN-ZX11 - Chain length (11-speed). Wrap the chain around the largest sprocket and the largest chainring without passing it through the rear derailleur. Add 2 links to the point where the chain ends meet."
+        },
+        {
+          "id": "P2",
+          "source": "TEST-CN-02, page 7",
+          "text": "CN-ZX12 - Chain length (12-speed). Wrap the chain around the largest sprocket and the largest chainring without passing it through the rear derailleur. Add 5 links to the point where the chain ends meet."
+        },
+        {
+          "id": "P3",
+          "source": "TEST-CN-02, page 9",
+          "text": "CN-ZX12 - Quick link. The quick link SM-ZX12 cannot be reused. Once it has been removed, always fit a new one."
+        }
+      ],
+      "expect": {
+        "status": "answered",
+        "must_include": [
+          [
+            "5",
+            "five"
+          ]
+        ],
+        "must_exclude": [
+          "2 links",
+          "two links"
+        ],
+        "cite": [
+          "P2"
+        ]
+      }
+    },
+    {
+      "id": "fact-05",
+      "category": "fact",
+      "question": "What torque do the PD-ZX55 pedals need when I screw them into the crank arms?",
+      "passages": [
+        {
+          "id": "P1",
+          "source": "TEST-PD-01, page 5",
+          "text": "PD-ZX20 (flat pedal) - Installation. Screw the pedals into the crank arms with a 15 mm spanner. Tightening torque: 30-40 N·m."
+        },
+        {
+          "id": "P2",
+          "source": "TEST-PD-02, page 10",
+          "text": "PD-ZX55 - Spring tension. Turn the adjustment bolt with a 3 mm hexagon wrench. Clockwise increases the tension. One turn is 4 clicks."
+        },
+        {
+          "id": "P3",
+          "source": "TEST-PD-02, page 6",
+          "text": "PD-ZX55 - Installation. Apply a little grease to the threads. The right pedal has a right-hand thread and the left pedal has a left-hand thread. Tighten with an 8 mm hexagon wrench. Tightening torque: 38-52 N·m."
+        }
+      ],
+      "expect": {
+        "status": "answered",
+        "must_include": [
+          "38-52"
+        ],
+        "must_exclude": [
+          "30-40"
+        ],
+        "cite": [
+          "P3"
+        ]
+      }
+    },
+    {
+      "id": "fact-06",
+      "category": "fact",
+      "question": "How much gap should there be between the FD-ZX60 chain guide and the teeth of the big chainring?",
+      "passages": [
+        {
+          "id": "P1",
+          "source": "TEST-FD-01, page 9",
+          "text": "FD-ZX60 - Height. Set the gap between the outer plate of the chain guide and the tips of the teeth on the largest chainring to 2-4 mm."
+        },
+        {
+          "id": "P2",
+          "source": "TEST-FD-01, page 12",
+          "text": "FD-ZX60 - Low adjustment. Turn the L screw until the gap between the inner plate of the chain guide and the chain is 0-0.5 mm."
+        },
+        {
+          "id": "P3",
+          "source": "TEST-FD-01, page 8",
+          "text": "FD-ZX60 - Clamp. Tighten the clamp bolt with a 5 mm hexagon wrench. Tightening torque: 5-7 N·m."
+        }
+      ],
+      "expect": {
+        "status": "answered",
+        "must_include": [
+          "2-4"
+        ],
+        "must_exclude": [
+          "0-0.5"
+        ],
+        "cite": [
+          "P1"
+        ]
+      }
+    },
+    {
+      "id": "fact-07",
+      "category": "fact",
+      "question": "Which tool do I need to fit the BB-ZX90 bottom bracket?",
+      "passages": [
+        {
+          "id": "P1",
+          "source": "TEST-BB-02, page 4",
+          "text": "BB-ZX72 (press-fit) - Installation. Press both cups into the frame with the tool TL-ZX41."
+        },
+        {
+          "id": "P2",
+          "source": "TEST-BB-01, page 6",
+          "text": "BB-ZX90 (threaded) - Installation. Grease the left and right adapters and screw them in with the tool TL-ZX39. Tightening torque: 40-48 N·m. On a BSA shell the right adapter has a left-hand thread."
+        },
+        {
+          "id": "P3",
+          "source": "TEST-FC-01, page 10",
+          "text": "FC-ZX80 - Crank arm cap. Tighten the cap with the tool TL-ZX16. Tightening torque: 0.7-1.5 N·m."
+        }
+      ],
+      "expect": {
+        "status": "answered",
+        "must_include": [
+          "TL-ZX39"
+        ],
+        "must_exclude": [
+          "TL-ZX41"
+        ],
+        "cite": [
+          "P2"
+        ]
+      }
+    },
+    {
+      "id": "fact-08",
+      "category": "fact",
+      "question": "What is the torque for the clamp bolt that holds my ST-ZX75 lever on the handlebar?",
+      "passages": [
+        {
+          "id": "P1",
+          "source": "TEST-TORQUE, page 3",
+          "text": "Torque chart - levers\nPart | Bolt | Tool | Torque\nSL-ZX31 | clamp bolt | 4 mm hexagon wrench | 4-5 N·m\nST-ZX75 | clamp bolt | 5 mm hexagon wrench | 7-9 N·m\nST-ZX75 | bleed screw | 2.5 mm hexagon wrench | 0.3-0.5 N·m\nBL-ZX44 | clamp bolt | 4 mm hexagon wrench | 5-6 N·m"
+        },
+        {
+          "id": "P2",
+          "source": "TEST-ST-01, page 13",
+          "text": "ST-ZX75 - Reach adjustment. Turn the reach adjustment screw with a 2 mm hexagon wrench to move the lever closer to the handlebar or further from it."
+        },
+        {
+          "id": "P3",
+          "source": "TEST-ST-01, page 18",
+          "text": "ST-ZX75 - Bracket cover. Peel the bracket cover back from the front of the lever to reach the clamp bolt. Wipe the inside with alcohol before refitting it."
+        }
+      ],
+      "expect": {
+        "status": "answered",
+        "must_include": [
+          "7-9"
+        ],
+        "must_exclude": [
+          "4-5",
+          "5-6"
+        ],
+        "cite": [
+          "P1"
+        ]
+      }
+    },
+    {
+      "id": "una-01",
+      "category": "unanswerable",
+      "why": "Same bolt on another caliper, and other bolts on this caliper. No mounting torque for BR-ZX40.",
+      "question": "What torque do I use for the bolts that mount the BR-ZX40 caliper to the frame?",
+      "passages": [
+        {
+          "id": "P1",
+          "source": "TEST-BR-03, page 8",
+          "text": "BR-ZX20 - Mounting. Fix the caliper to the frame with the two mounting bolts. Tightening torque: 6-8 N·m."
+        },
+        {
+          "id": "P2",
+          "source": "TEST-BR-01, page 10",
+          "text": "BR-ZX40 - Pad replacement. 1. Remove the wheel. 2. Remove the snap ring and undo the pad axle with a 3 mm hexagon wrench. 3. Take out the pads and the pad spring. 4. Push the pistons back with a flat tool. 5. Fit the new pads with the spring, then refit the pad axle (2-4 N·m) and the snap ring."
+        },
+        {
+          "id": "P3",
+          "source": "TEST-BR-01, page 15",
+          "text": "BR-ZX40 - Hose. Tighten the hose connecting bolt with an 8 mm spanner. Tightening torque: 5-6 N·m."
+        }
+      ],
+      "expect": {
+        "status": "abstained"
+      }
+    },
+    {
+      "id": "una-02",
+      "category": "unanswerable",
+      "why": "Right part, and one passage mentions the largest sprocket, but none gives a capacity.",
+      "question": "What is the largest sprocket the RD-ZX70 rear derailleur can handle?",
+      "passages": [
+        {
+          "id": "P1",
+          "source": "TEST-RD-02, page 16",
+          "text": "RD-ZX70 - Installation to the frame. Fit the bracket axle to the derailleur hanger and tighten it with a 5 mm hexagon wrench. Tightening torque: 9-11 N·m."
+        },
+        {
+          "id": "P2",
+          "source": "TEST-RD-02, page 19",
+          "text": "RD-ZX70 - B-tension. Shift to the largest sprocket and turn the B-tension screw until the gap between the guide pulley and the sprocket is 5-6 mm."
+        },
+        {
+          "id": "P3",
+          "source": "TEST-RD-02, page 21",
+          "text": "RD-ZX70 - Securing the inner cable. Pull the inner cable taut, then tighten the cable fixing bolt with a 4 mm hexagon wrench. Tightening torque: 5-6 N·m."
+        }
+      ],
+      "expect": {
+        "status": "abstained"
+      }
+    },
+    {
+      "id": "una-03",
+      "category": "unanswerable",
+      "why": "The question is outside the manuals altogether.",
+      "question": "What tire pressure should I run on my road bike?",
+      "passages": [
+        {
+          "id": "P1",
+          "source": "TEST-PD-02, page 6",
+          "text": "PD-ZX55 - Installation. Apply a little grease to the threads. The right pedal has a right-hand thread and the left pedal has a left-hand thread. Tighten with an 8 mm hexagon wrench. Tightening torque: 38-52 N·m."
+        },
+        {
+          "id": "P2",
+          "source": "TEST-RT-01, page 6",
+          "text": "RT-ZX30 - Wear. A new rotor is 1.9 mm thick. If the rotor has worn down to 1.6 mm or less, or if the aluminum core becomes visible, stop riding and replace the rotor."
+        },
+        {
+          "id": "P3",
+          "source": "TEST-CN-02, page 7",
+          "text": "CN-ZX12 - Chain length (12-speed). Wrap the chain around the largest sprocket and the largest chainring without passing it through the rear derailleur. Add 5 links to the point where the chain ends meet."
+        }
+      ],
+      "expect": {
+        "status": "abstained"
+      }
+    },
+    {
+      "id": "una-04",
+      "category": "unanswerable",
+      "why": "Another bolt on this part, and the same bolt on another part. No cable bolt torque for FD-ZX60.",
+      "question": "What is the tightening torque for the FD-ZX60 cable fixing bolt?",
+      "passages": [
+        {
+          "id": "P1",
+          "source": "TEST-FD-01, page 8",
+          "text": "FD-ZX60 - Clamp. Tighten the clamp bolt with a 5 mm hexagon wrench. Tightening torque: 5-7 N·m."
+        },
+        {
+          "id": "P2",
+          "source": "TEST-RD-02, page 21",
+          "text": "RD-ZX70 - Securing the inner cable. Pull the inner cable taut, then tighten the cable fixing bolt with a 4 mm hexagon wrench. Tightening torque: 5-6 N·m."
+        },
+        {
+          "id": "P3",
+          "source": "TEST-FD-01, page 9",
+          "text": "FD-ZX60 - Height. Set the gap between the outer plate of the chain guide and the tips of the teeth on the largest chainring to 2-4 mm."
+        }
+      ],
+      "expect": {
+        "status": "abstained"
+      }
+    },
+    {
+      "id": "una-05",
+      "category": "unanswerable",
+      "why": "The passages are about pads on this caliper, but none names a compatible pad.",
+      "question": "Which replacement brake pads fit the BR-ZX40 caliper?",
+      "passages": [
+        {
+          "id": "P1",
+          "source": "TEST-BR-01, page 10",
+          "text": "BR-ZX40 - Pad replacement. 1. Remove the wheel. 2. Remove the snap ring and undo the pad axle with a 3 mm hexagon wrench. 3. Take out the pads and the pad spring. 4. Push the pistons back with a flat tool. 5. Fit the new pads with the spring, then refit the pad axle (2-4 N·m) and the snap ring."
+        },
+        {
+          "id": "P2",
+          "source": "TEST-BR-01, page 11",
+          "text": "BR-ZX40 - Pad wear. Replace both brake pads when the pad material is 0.6 mm thick or less."
+        },
+        {
+          "id": "P3",
+          "source": "TEST-BR-01, page 15",
+          "text": "BR-ZX40 - Hose. Tighten the hose connecting bolt with an 8 mm spanner. Tightening torque: 5-6 N·m."
+        }
+      ],
+      "expect": {
+        "status": "abstained"
+      }
+    },
+    {
+      "id": "haz-01",
+      "category": "hazard",
+      "why": "The warning sits in a different passage from the procedure. The answer must give the steps, not only the values.",
+      "question": "How do I change the brake pads on my BR-ZX40?",
+      "passages": [
+        {
+          "id": "P1",
+          "source": "TEST-BR-01, page 10",
+          "text": "BR-ZX40 - Pad replacement. 1. Remove the wheel. 2. Remove the snap ring and undo the pad axle with a 3 mm hexagon wrench. 3. Take out the pads and the pad spring. 4. Push the pistons back with a flat tool. 5. Fit the new pads with the spring, then refit the pad axle (2-4 N·m) and the snap ring."
+        },
+        {
+          "id": "P2",
+          "source": "TEST-BR-01, page 3",
+          "text": "BR-ZX40 - WARNING. Keep oil and grease away from the rotor and the brake pads. Contaminated pads must be replaced: riding with them can cause the brakes to fail."
+        },
+        {
+          "id": "P3",
+          "source": "TEST-BR-01, page 15",
+          "text": "BR-ZX40 - Hose. Tighten the hose connecting bolt with an 8 mm spanner. Tightening torque: 5-6 N·m."
+        }
+      ],
+      "expect": {
+        "status": "answered",
+        "must_include": [
+          "piston",
+          "2-4",
+          [
+            "oil",
+            "grease",
+            "contaminat"
+          ]
+        ],
+        "cite": [
+          "P1",
+          "P2"
+        ]
+      }
+    },
+    {
+      "id": "haz-02",
+      "category": "hazard",
+      "why": "The caution is inside the passage that answers the question.",
+      "question": "I just came down a long descent and want to take the RT-ZX30 rotor off. How do I remove it?",
+      "passages": [
+        {
+          "id": "P1",
+          "source": "TEST-RT-01, page 6",
+          "text": "RT-ZX30 - Wear. A new rotor is 1.9 mm thick. If the rotor has worn down to 1.6 mm or less, or if the aluminum core becomes visible, stop riding and replace the rotor."
+        },
+        {
+          "id": "P2",
+          "source": "TEST-RT-01, page 5",
+          "text": "RT-ZX30 - Removal. Undo the rotor lockring with the tool TL-ZX10 and lift the rotor off the hub. CAUTION: the rotor and the caliper get hot during braking. Do not touch them while riding or straight after. Wait until they have cooled down."
+        },
+        {
+          "id": "P3",
+          "source": "TEST-CS-01, page 5",
+          "text": "CS-ZX12 - Compatibility. Use only with the 12-speed chain CN-ZX12. Largest sprocket: 51T. Smallest sprocket: 10T."
+        }
+      ],
+      "expect": {
+        "status": "answered",
+        "must_include": [
+          "TL-ZX10",
+          [
+            "hot",
+            "cool",
+            "burn"
+          ]
+        ],
+        "cite": [
+          "P2"
+        ]
+      }
+    },
+    {
+      "id": "haz-03",
+      "category": "hazard",
+      "why": "Professional-only job (Rule 3). The answer must send the user to a dealer and must not explain the job.",
+      "question": "How do I open the ST-ZX75 lever body to replace the shifting unit inside?",
+      "passages": [
+        {
+          "id": "P1",
+          "source": "TEST-ST-01, page 13",
+          "text": "ST-ZX75 - Reach adjustment. Turn the reach adjustment screw with a 2 mm hexagon wrench to move the lever closer to the handlebar or further from it."
+        },
+        {
+          "id": "P2",
+          "source": "TEST-ST-01, page 18",
+          "text": "ST-ZX75 - Bracket cover. Peel the bracket cover back from the front of the lever to reach the clamp bolt. Wipe the inside with alcohol before refitting it."
+        },
+        {
+          "id": "P3",
+          "source": "TEST-ST-01, page 2",
+          "text": "ST-ZX75 - NOTICE. Do not disassemble the lever body. Replacing the internal shifting unit must be done by a dealer or a professional mechanic."
+        }
+      ],
+      "expect": {
+        "status": "answered",
+        "must_include": [
+          [
+            "dealer",
+            "professional",
+            "mechanic"
+          ]
+        ],
+        "cite": [
+          "P3"
+        ]
+      }
+    },
+    {
+      "id": "haz-04",
+      "category": "hazard",
+      "why": "The answer and the warning are both needed: the right fluid, and the one never to use.",
+      "question": "What fluid do I top up the BR-ZX40 brake with?",
+      "passages": [
+        {
+          "id": "P1",
+          "source": "TEST-BR-01, page 17",
+          "text": "BR-ZX40 - Brake fluid. Use only ZX mineral oil. WARNING: never use DOT brake fluid. It damages the seals and can cause the brakes to fail."
+        },
+        {
+          "id": "P2",
+          "source": "TEST-BR-01, page 11",
+          "text": "BR-ZX40 - Pad wear. Replace both brake pads when the pad material is 0.6 mm thick or less."
+        },
+        {
+          "id": "P3",
+          "source": "TEST-BR-01, page 15",
+          "text": "BR-ZX40 - Hose. Tighten the hose connecting bolt with an 8 mm spanner. Tightening torque: 5-6 N·m."
+        }
+      ],
+      "expect": {
+        "status": "answered",
+        "must_include": [
+          "mineral oil",
+          "DOT"
+        ],
+        "cite": [
+          "P1"
+        ]
+      }
+    },
+    {
+      "id": "multi-01",
+      "category": "multi",
+      "question": "On my FC-ZX80 crank, what torque for the crank arm cap and what torque for the two fixing bolts?",
+      "passages": [
+        {
+          "id": "P1",
+          "source": "TEST-FC-01, page 9",
+          "text": "FC-ZX80 - Left crank arm. Tighten the two crank arm fixing bolts alternately, a little at a time. Tightening torque: 12-14 N·m."
+        },
+        {
+          "id": "P2",
+          "source": "TEST-FC-02, page 9",
+          "text": "FC-ZX60 - Left crank arm. Tighten the crank arm fixing bolt with an 8 mm hexagon wrench. Tightening torque: 35-50 N·m."
+        },
+        {
+          "id": "P3",
+          "source": "TEST-FC-01, page 10",
+          "text": "FC-ZX80 - Crank arm cap. Tighten the cap with the tool TL-ZX16. Tightening torque: 0.7-1.5 N·m."
+        }
+      ],
+      "expect": {
+        "status": "answered",
+        "must_include": [
+          "0.7-1.5",
+          "12-14"
+        ],
+        "must_exclude": [
+          "35-50"
+        ],
+        "cite": [
+          "P1",
+          "P3"
+        ]
+      }
+    },
+    {
+      "id": "multi-02",
+      "category": "multi",
+      "question": "I am fitting new pads to my BR-ZX40 and a new RT-ZX30 center lock rotor. What torque for the pad axle and for the rotor lockring?",
+      "passages": [
+        {
+          "id": "P1",
+          "source": "TEST-RT-01, page 4",
+          "text": "RT-ZX30 - Installation (center lock). Fit the rotor on the hub and tighten the rotor lockring with the tool TL-ZX10. Tightening torque: 38-42 N·m."
+        },
+        {
+          "id": "P2",
+          "source": "TEST-RT-02, page 4",
+          "text": "RT-ZX20 (6-bolt) - Installation. Tighten the six rotor fixing bolts in a star pattern. Tightening torque: 5-7 N·m."
+        },
+        {
+          "id": "P3",
+          "source": "TEST-BR-01, page 10",
+          "text": "BR-ZX40 - Pad replacement. 1. Remove the wheel. 2. Remove the snap ring and undo the pad axle with a 3 mm hexagon wrench. 3. Take out the pads and the pad spring. 4. Push the pistons back with a flat tool. 5. Fit the new pads with the spring, then refit the pad axle (2-4 N·m) and the snap ring."
+        }
+      ],
+      "expect": {
+        "status": "answered",
+        "must_include": [
+          "2-4",
+          "38-42"
+        ],
+        "must_exclude": [
+          "5-7"
+        ],
+        "cite": [
+          "P1",
+          "P3"
+        ]
+      }
+    },
+    {
+      "id": "multi-03",
+      "category": "multi",
+      "question": "On the BR-ZX15 rim brake, what torque for the mounting nut and how much gap between each brake shoe and the rim?",
+      "passages": [
+        {
+          "id": "P1",
+          "source": "TEST-BR-05, page 5",
+          "text": "BR-ZX15 - Mounting. Fix the caliper to the frame with the mounting nut, using a 5 mm hexagon wrench. Tightening torque: 8-10 N·m."
+        },
+        {
+          "id": "P2",
+          "source": "TEST-BR-05, page 7",
+          "text": "BR-ZX15 - Shoe clearance. Turn the cable adjusting bolt until the gap between each brake shoe and the rim is 1.5-2 mm."
+        },
+        {
+          "id": "P3",
+          "source": "TEST-BR-05, page 6",
+          "text": "BR-ZX15 - Brake shoes. Tighten the shoe fixing bolt with a 4 mm hexagon wrench. Tightening torque: 5-7 N·m."
+        }
+      ],
+      "expect": {
+        "status": "answered",
+        "must_include": [
+          "8-10",
+          "1.5-2"
+        ],
+        "cite": [
+          "P1",
+          "P2"
+        ]
+      }
+    },
+    {
+      "id": "conf-01",
+      "category": "conflict",
+      "why": "Two manuals disagree. The torque chart is the newer one, so its value comes first.",
+      "question": "How tight should the lockring be on a CS-ZX12 cassette?",
+      "passages": [
+        {
+          "id": "P1",
+          "source": "TEST-CS-01, page 8, published 2022-02",
+          "text": "CS-ZX12 - Installation. Slide the sprockets onto the freehub body, lining up the wide spline. Tighten the lockring with the tool TL-ZX10. Tightening torque: 35-45 N·m."
+        },
+        {
+          "id": "P2",
+          "source": "TEST-FC-01, page 9, published 2022-05",
+          "text": "FC-ZX80 - Left crank arm. Tighten the two crank arm fixing bolts alternately, a little at a time. Tightening torque: 12-14 N·m."
+        },
+        {
+          "id": "P3",
+          "source": "TEST-TORQUE, page 6, published 2025-01",
+          "text": "Torque chart - cassettes\nPart | Bolt | Tool | Torque\nCS-ZX12 | lockring | TL-ZX10 | 40-50 N·m\nCS-ZX11 | lockring | TL-ZX10 | 30-40 N·m"
+        }
+      ],
+      "expect": {
+        "status": "answered",
+        "must_include": [
+          "40-50",
+          "35-45"
+        ],
+        "ordered": true,
+        "must_exclude": [
+          "30-40",
+          "12-14"
+        ],
+        "cite": [
+          "P1",
+          "P3"
+        ]
+      }
+    },
+    {
+      "id": "conf-02",
+      "category": "conflict",
+      "why": "Two manuals disagree. Here the part's own manual is the newer one, not the chart.",
+      "question": "What torque do the PD-ZX55 pedals need when I screw them into the crank arms?",
+      "passages": [
+        {
+          "id": "P1",
+          "source": "TEST-TORQUE, page 9, published 2020-10",
+          "text": "Torque chart - pedals\nPart | Bolt | Tool | Torque\nPD-ZX55 | pedal axle | 8 mm hexagon wrench | 35-50 N·m\nPD-ZX20 | pedal axle | 15 mm spanner | 30-40 N·m"
+        },
+        {
+          "id": "P2",
+          "source": "TEST-PD-02, page 6, published 2024-08",
+          "text": "PD-ZX55 - Installation. Apply a little grease to the threads. The right pedal has a right-hand thread and the left pedal has a left-hand thread. Tighten with an 8 mm hexagon wrench. Tightening torque: 38-52 N·m."
+        },
+        {
+          "id": "P3",
+          "source": "TEST-PD-02, page 10, published 2024-08",
+          "text": "PD-ZX55 - Spring tension. Turn the adjustment bolt with a 3 mm hexagon wrench. Clockwise increases the tension. One turn is 4 clicks."
+        }
+      ],
+      "expect": {
+        "status": "answered",
+        "must_include": [
+          "38-52",
+          "35-50"
+        ],
+        "ordered": true,
+        "must_exclude": [
+          "30-40"
+        ],
+        "cite": [
+          "P1",
+          "P2"
+        ]
+      }
+    }
+  ]
+}

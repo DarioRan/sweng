@@ -11,6 +11,12 @@ httpx==0.28.1
 argon2-cffi==25.1.0         # password hashing, Argon2id (T-402)
 pyjwt==2.15.1                # signed sign-in tokens (T-402)
 
+# Corpus ingestion (T-203b)
+pypdf[crypto]==6.19.0        # text from the manual PDFs; crypto opens print-restricted ones
+fastembed==0.8.1             # runs EMBEDDER_MODEL on ONNX, no PyTorch; qdrant-client 1.19 wants 0.8.x
+                             # (it also brings tokenizers and Pillow, which ingestion uses)
+pypdfium2==5.13.0            # renders pages, to crop the figures out of them
+
 # Development and CI (T-305)
 pytest==9.1.1
 ruff==0.16.8

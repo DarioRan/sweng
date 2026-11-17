@@ -1,0 +1,256 @@
+{
+  "_comment": "Rule 3 hazard list (T-503). Written in our own words from the Shimano dealer's manuals; the manuals themselves are not redistributed (§1.4). Each entry cites the document, revision and printed page it was read from. See backend/app/safety/README.md for the fields and for how professional-only marks are decided.",
+  "hazards": [
+    {
+      "id": "eye-protection",
+      "components": ["*"],
+      "level": "warning",
+      "text": "Wear safety glasses while removing, replacing or cutting parts.",
+      "patterns": ["\\bremov", "\\breplac", "\\bcut\\b", "\\bcutting\\b"],
+      "professional_only": false,
+      "source": {"document_id": "DM-MARD001", "revision": "06", "pages": [4]}
+    },
+    {
+      "id": "chain-connecting-pin-tool",
+      "components": ["chain"],
+      "level": "warning",
+      "text": "Join the chain only with the connecting pin and chain tool specified for that chain. The wrong pin or tool may not hold, and the chain can break or come off while riding.",
+      "patterns": ["connecting pin", "chain (cutter|tool)", "\\b(join|connect)\\w* the chain"],
+      "professional_only": false,
+      "source": {"document_id": "DM-CN0001", "revision": "07", "pages": [4]}
+    },
+    {
+      "id": "chain-cut-location",
+      "components": ["chain"],
+      "level": "warning",
+      "text": "When shortening the chain, do not cut it where it was already joined with a reinforced connecting pin or a QUICK-LINK: the chain is damaged there.",
+      "patterns": ["\\bcut\\w* the chain", "\\bshorten", "remove (\\w+ )?links?", "chain length"],
+      "professional_only": false,
+      "source": {"document_id": "DM-CN0001", "revision": "07", "pages": [4]}
+    },
+    {
+      "id": "chain-no-acid-solvent",
+      "components": ["chain", "cassette", "rear_derailleur"],
+      "level": "warning",
+      "text": "Never clean the chain with acid- or alkali-based products such as rust removers. They weaken the chain and it can break while riding.",
+      "patterns": ["\\bclean", "degreas", "solvent", "rust"],
+      "professional_only": false,
+      "source": {"document_id": "DM-CN0001", "revision": "07", "pages": [4]}
+    },
+    {
+      "id": "quick-link-single-use",
+      "components": ["chain"],
+      "level": "warning",
+      "text": "A QUICK-LINK is single-use: fit a new one every time, and a new one with every new chain. Check that both pins are pushed fully home. A reused or half-seated link can come apart while riding.",
+      "patterns": ["quick-?link"],
+      "professional_only": false,
+      "source": {"document_id": "DM-GN0001", "revision": "29", "pages": [72]}
+    },
+    {
+      "id": "quick-link-removal",
+      "components": ["chain"],
+      "level": "warning",
+      "text": "Opening a QUICK-LINK needs Shimano's dedicated tool.",
+      "patterns": ["(remov|open|undo|unclip|release)\\w* (the |a )?quick-?link", "quick-?link (plier|tool)"],
+      "professional_only": true,
+      "reason": "Shimano says removing a QUICK-LINK needs its dedicated tool and tells riders to have a dealer do it.",
+      "source": {"document_id": "DM-GN0001", "revision": "29", "pages": [72]}
+    },
+    {
+      "id": "cassette-lock-ring-removal",
+      "components": ["cassette"],
+      "level": "warning",
+      "text": "Wear gloves and eye protection when loosening the cassette lock ring, and apply force gradually. The lock ring can let go suddenly and your hand can hit the sprockets.",
+      "patterns": ["lock ?ring"],
+      "professional_only": false,
+      "source": {"document_id": "DM-LACS001", "revision": "01", "pages": [4, 7]}
+    },
+    {
+      "id": "rd-wheel-turning-cable",
+      "components": ["rear_derailleur"],
+      "level": "caution",
+      "text": "Keep the wheel still while securing the inner cable and fitting the cable end cap. A turning wheel can catch your fingers.",
+      "patterns": ["inner cable", "end cap"],
+      "professional_only": false,
+      "source": {"document_id": "DM-MARD001", "revision": "06", "pages": [4, 17]}
+    },
+    {
+      "id": "rd-clutch-teardown",
+      "components": ["rear_derailleur"],
+      "level": "warning",
+      "text": "Taking the rear derailleur's plate, P-tension spring and clutch unit apart is internal service work.",
+      "patterns": ["p-tension spring", "plate stopper pin", "plate axle", "cam unit", "switch lever .*retaining clip|retaining clip .*switch lever"],
+      "professional_only": true,
+      "reason": "Taking the derailleur's spring-loaded clutch apart is internal mechanism service. The manual forbids disassembly beyond what the dealer's manual describes, and that manual is meant for trained mechanics.",
+      "source": {"document_id": "DM-MARD001", "revision": "06", "pages": [3, 33]}
+    },
+    {
+      "id": "shift-lever-unit-disassembly",
+      "components": ["shift_brake_lever"],
+      "level": "warning",
+      "text": "Do not take the shifting lever unit apart.",
+      "patterns": ["(disassembl|take apart|open)\\w* (the )?(shift(ing)? )?lever (unit|body|mechanism)", "lever unit .*(disassembl|apart)"],
+      "professional_only": true,
+      "reason": "Shimano says not to disassemble the shifting lever unit: it can be damaged or stop shifting reliably.",
+      "source": {"document_id": "DM-GN0001", "revision": "29", "pages": [140]}
+    },
+    {
+      "id": "disc-hot",
+      "components": ["disc_brake_caliper", "disc_rotor"],
+      "level": "warning",
+      "text": "The caliper and rotor get hot when the brakes are used. Let them cool before touching or adjusting them.",
+      "patterns": ["\\bcaliper", "\\brotor", "brake pads?"],
+      "professional_only": false,
+      "source": {"document_id": "DM-GN0001", "revision": "29", "pages": [78]}
+    },
+    {
+      "id": "disc-rotor-sharp",
+      "components": ["disc_rotor", "disc_brake_caliper"],
+      "level": "warning",
+      "text": "Wear gloves when handling the rotor or its lock ring, and keep fingers away from the openings of a turning rotor. The edges are sharp enough to cut badly.",
+      "patterns": ["\\brotor"],
+      "professional_only": false,
+      "source": {"document_id": "DM-LADBR01", "revision": "01", "pages": [5, 8]}
+    },
+    {
+      "id": "disc-no-oil-on-pads",
+      "components": ["disc_brake_caliper", "disc_rotor"],
+      "level": "warning",
+      "text": "Keep oil and grease off the pads and rotor. Pads that get oil on them must be replaced, and the rotor wiped clean, or the brake may not stop the bike.",
+      "patterns": ["brake pads?", "\\brotor", "\\b(oil|grease|lubric)"],
+      "professional_only": false,
+      "source": {"document_id": "DM-GN0001", "revision": "29", "pages": [78]}
+    },
+    {
+      "id": "disc-pad-wear-limit",
+      "components": ["disc_brake_caliper"],
+      "level": "warning",
+      "text": "Replace pads that are 0.5 mm thick or less, and a rotor that is cracked, bent, 1.5 mm thick or less, or worn through to the aluminium. Worn parts can fail and the brake may not work.",
+      "patterns": ["brake pads?", "pad thickness", "\\bworn\\b"],
+      "professional_only": false,
+      "source": {"document_id": "DM-LADBR01", "revision": "01", "pages": [5, 6]}
+    },
+    {
+      "id": "disc-lever-wheel-removed",
+      "components": ["disc_brake_caliper", "shift_brake_lever"],
+      "level": "caution",
+      "text": "With the wheel out, fit the pad spacer and do not squeeze the brake lever, or the pistons will push out too far.",
+      "patterns": ["remove the wheel", "wheel (is |has been )?removed", "pad spacer"],
+      "professional_only": false,
+      "source": {"document_id": "DM-LADBR01", "revision": "01", "pages": [10]}
+    },
+    {
+      "id": "disc-bed-in",
+      "components": ["disc_brake_caliper", "disc_rotor"],
+      "level": "caution",
+      "text": "New pads or a new rotor need a bed-in period: braking force builds up over the first rides. Ride carefully until it does.",
+      "patterns": ["(install|fit|set)\\w* (the )?(new )?brake pads", "new (brake )?pads", "(install|replac)\\w* (the )?(disc brake )?rotor"],
+      "professional_only": false,
+      "source": {"document_id": "DM-LADBR01", "revision": "01", "pages": [8]}
+    },
+    {
+      "id": "disc-check-before-riding",
+      "components": ["disc_brake_caliper", "shift_brake_lever"],
+      "level": "warning",
+      "text": "Hydraulic disc brakes may not work after the bike has been upside down or on its side. Squeeze the lever a few times and check that the brake works before riding.",
+      "patterns": ["upside down", "on its side", "turn the bi(ke|cycle) over"],
+      "professional_only": false,
+      "source": {"document_id": "DM-GN0001", "revision": "29", "pages": [78]}
+    },
+    {
+      "id": "hydraulic-bleed",
+      "components": ["disc_brake_caliper", "shift_brake_lever"],
+      "level": "warning",
+      "text": "Opening the hydraulic system to drain, add or bleed mineral oil.",
+      "patterns": ["bleed (nipple|screw)", "\\bbleed(ing)?\\b.*\\b(air|brake|oil)", "mineral oil", "oil funnel", "\\b(add|drain|replac)\\w* (the )?oil"],
+      "professional_only": true,
+      "reason": "Bleeding a hydraulic brake is professional work. If water or air gets into the system the brake can fail. Shimano's warnings on oil type, old oil and air bubbles all concern this job, and cycling repair guides agree it is a job for a shop.",
+      "source": {"document_id": "DM-LADBR01", "revision": "01", "pages": [6, 36]}
+    },
+    {
+      "id": "hydraulic-hose-cut",
+      "components": ["disc_brake_caliper", "shift_brake_lever"],
+      "level": "warning",
+      "text": "Cutting or replacing a hydraulic brake hose.",
+      "patterns": ["\\b(cut|shorten|replac)\\w* (the )?(brake )?hose", "connector insert", "\\bolive\\b", "flare nut", "hose cutter"],
+      "professional_only": true,
+      "reason": "Cutting or replacing a hydraulic hose opens the brake system and must be followed by a bleed. An uneven cut, a wrong connector insert or a reused olive can leak, and the brake can fail.",
+      "source": {"document_id": "DM-LADBR01", "revision": "01", "pages": [6, 7, 23]}
+    },
+    {
+      "id": "caliper-piston-removal",
+      "components": ["disc_brake_caliper"],
+      "level": "warning",
+      "text": "Do not remove the caliper pistons.",
+      "patterns": ["(remov|take out|extract|pull out)\\w* (the )?pistons?", "pistons? (removal|out of)"],
+      "professional_only": true,
+      "reason": "Shimano says not to remove the pistons when cleaning or taking the caliper apart.",
+      "source": {"document_id": "DM-LADBR01", "revision": "01", "pages": [10]}
+    },
+    {
+      "id": "caliper-piston-protruding",
+      "components": ["disc_brake_caliper"],
+      "level": "warning",
+      "text": "Pistons that stick out unevenly, stay out, or keep the pads rubbing the rotor.",
+      "patterns": ["pistons? (protrud|stick)\\w* (out )?(unevenly|too far|further)", "pistons? (do|does) not (operate|move|return)"],
+      "professional_only": true,
+      "reason": "Shimano tells riders to consult the place of purchase when the pistons stick out further than normal.",
+      "source": {"document_id": "DM-LADBR01", "revision": "01", "pages": [10, 48]}
+    },
+    {
+      "id": "rim-brake-mounting-nut",
+      "components": ["rim_brake_caliper"],
+      "level": "warning",
+      "text": "Tighten the brake mounting nut to the specified torque, using a self-locking nut or, for sunken nuts, one long enough to turn at least six times, with thread-locker when refitting. A loose brake can fall into the wheel and throw the rider forward.",
+      "patterns": ["mounting (nut|bolt)", "sunken nut", "(install|mount|fit)\\w* (the )?(brake )?caliper"],
+      "professional_only": false,
+      "source": {"document_id": "DM-RACBR01", "revision": "03", "pages": [6]}
+    },
+    {
+      "id": "rim-brake-front-rear",
+      "components": ["rim_brake_caliper", "v_brake"],
+      "level": "warning",
+      "text": "A brake made for the rear wheel must not be fitted as a front brake.",
+      "patterns": ["\\b(install|mount|fit)\\w*"],
+      "professional_only": false,
+      "source": {"document_id": "DM-RACBR01", "revision": "03", "pages": [6]}
+    },
+    {
+      "id": "rim-brake-shoe-oil",
+      "components": ["rim_brake_caliper", "v_brake"],
+      "level": "warning",
+      "text": "Keep oil and grease off the brake shoes. Shoes with oil on them must be replaced, or the brake may not work.",
+      "patterns": ["brake shoes?", "\\bshoes?\\b", "\\b(oil|grease|lubric)"],
+      "professional_only": false,
+      "source": {"document_id": "DM-GN0001", "revision": "29", "pages": [79]}
+    },
+    {
+      "id": "rim-brake-cable",
+      "components": ["rim_brake_caliper", "v_brake"],
+      "level": "warning",
+      "text": "Replace a brake cable that is rusty, frayed or cracked. On polymer-coated cables (BC-9000/BC-R680), wipe grease off the inner cable before clamping it, or the cable can slip and the brake loses its hold.",
+      "patterns": ["(inner|brake) cable", "cable (fixing|anchor) bolt"],
+      "professional_only": false,
+      "source": {"document_id": "DM-RACBR01", "revision": "03", "pages": [5, 7]}
+    },
+    {
+      "id": "carbon-lever-damage",
+      "components": ["shift_brake_lever"],
+      "level": "warning",
+      "text": "A carbon lever that is cracked or peeling.",
+      "patterns": ["carbon .*(crack|peel|damag)", "(crack|peel|damag)\\w* .*carbon"],
+      "professional_only": true,
+      "reason": "Shimano says to stop riding and consult a dealer if a carbon lever is cracked or peeling. It must never be repaired or altered, or it may break and leave you without a brake.",
+      "source": {"document_id": "DM-RACBR01", "revision": "03", "pages": [5]}
+    },
+    {
+      "id": "v-brake-power-modulator",
+      "components": ["v_brake"],
+      "level": "warning",
+      "text": "Beyond its working range the power modulator stops softening the brake, and the V-brake can lock the wheel. Test the brake before riding.",
+      "patterns": ["power modulator"],
+      "professional_only": false,
+      "source": {"document_id": "DM-GN0001", "revision": "29", "pages": [81]}
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+# Optional: give Ollama the host's NVIDIA GPU. Kept out of docker-compose.yml
+# because a GPU reservation stops the stack from starting on a machine without
+# one (NFR-01). Needs the NVIDIA Container Toolkit on the host.
+#
+#     docker compose -f docker-compose.yml -f docker-compose.gpu.yml --profile bench run --rm llm-bench
+#
+# The device is named through CDI, which is what podman needs: it silently
+# ignores `driver: nvidia` and Ollama then runs on the CPU. On Docker Engine
+# without CDI enabled, replace the two marked lines with `driver: nvidia` and
+# `count: all`.
+#
+# Check that it took: `docker compose logs ollama | grep "inference compute"`
+# should show library=cuda, not library=cpu.
+
+services:
+  ollama:
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: cdi                            # marked
+              device_ids: ["nvidia.com/gpu=all"]     # marked
+              capabilities: [gpu]

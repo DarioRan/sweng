@@ -1,0 +1,188 @@
+{
+ "info": {
+  "bike": "b05",
+  "annotator": "narmeen",
+  "tool": "Label Studio",
+  "imported": "2026-11-16"
+ },
+ "categories": [
+  {
+   "id": 1,
+   "name": "rear_derailleur",
+   "supercategory": "drivetrain"
+  },
+  {
+   "id": 2,
+   "name": "front_derailleur",
+   "supercategory": "drivetrain"
+  },
+  {
+   "id": 3,
+   "name": "cassette",
+   "supercategory": "drivetrain"
+  },
+  {
+   "id": 4,
+   "name": "chain",
+   "supercategory": "drivetrain"
+  },
+  {
+   "id": 5,
+   "name": "crankset",
+   "supercategory": "drivetrain"
+  },
+  {
+   "id": 6,
+   "name": "bottom_bracket",
+   "supercategory": "drivetrain"
+  },
+  {
+   "id": 7,
+   "name": "pedal",
+   "supercategory": "drivetrain"
+  },
+  {
+   "id": 8,
+   "name": "shift_brake_lever",
+   "supercategory": "control"
+  },
+  {
+   "id": 9,
+   "name": "disc_brake_caliper",
+   "supercategory": "brake"
+  },
+  {
+   "id": 10,
+   "name": "disc_rotor",
+   "supercategory": "brake"
+  },
+  {
+   "id": 11,
+   "name": "rim_brake_caliper",
+   "supercategory": "brake"
+  },
+  {
+   "id": 12,
+   "name": "v_brake",
+   "supercategory": "brake"
+  }
+ ],
+ "images": [
+  {
+   "id": 1,
+   "file_name": "images/b05/cassette/b05_cassette_001.jpg",
+   "width": 1205,
+   "height": 1600
+  },
+  {
+   "id": 2,
+   "file_name": "images/b05/cassette/b05_cassette_002.jpg",
+   "width": 1205,
+   "height": 1600
+  },
+  {
+   "id": 3,
+   "file_name": "images/b05/cassette/b05_cassette_003.jpg",
+   "width": 1205,
+   "height": 1600
+  },
+  {
+   "id": 4,
+   "file_name": "images/b05/cassette/b05_cassette_004.jpg",
+   "width": 1205,
+   "height": 1600
+  },
+  {
+   "id": 5,
+   "file_name": "images/b05/front_derailleur/b05_front_derailleur_001.jpg",
+   "width": 1205,
+   "height": 1600
+  },
+  {
+   "id": 6,
+   "file_name": "images/b05/front_derailleur/b05_front_derailleur_002.jpg",
+   "width": 1205,
+   "height": 1600
+  }
+ ],
+ "annotations": [
+  {
+   "id": 1,
+   "image_id": 1,
+   "category_id": 3,
+   "bbox": [
+    259.0,
+    587.0,
+    545.0,
+    619.0
+   ],
+   "area": 337355.0,
+   "iscrowd": 0
+  },
+  {
+   "id": 2,
+   "image_id": 2,
+   "category_id": 3,
+   "bbox": [
+    248.0,
+    702.0,
+    865.0,
+    536.0
+   ],
+   "area": 463640.0,
+   "iscrowd": 0
+  },
+  {
+   "id": 3,
+   "image_id": 3,
+   "category_id": 3,
+   "bbox": [
+    156.0,
+    711.0,
+    972.0,
+    542.0
+   ],
+   "area": 526824.0,
+   "iscrowd": 0
+  },
+  {
+   "id": 4,
+   "image_id": 4,
+   "category_id": 3,
+   "bbox": [
+    144.0,
+    397.0,
+    693.0,
+    824.0
+   ],
+   "area": 571032.0,
+   "iscrowd": 0
+  },
+  {
+   "id": 5,
+   "image_id": 5,
+   "category_id": 2,
+   "bbox": [
+    10.0,
+    139.0,
+    1102.0,
+    1197.0
+   ],
+   "area": 1319094.0,
+   "iscrowd": 0
+  },
+  {
+   "id": 6,
+   "image_id": 6,
+   "category_id": 2,
+   "bbox": [
+    150.0,
+    33.0,
+    1004.0,
+    1212.0
+   ],
+   "area": 1216848.0,
+   "iscrowd": 0
+  }
+ ]
+}
