@@ -6,7 +6,8 @@ without PostgreSQL; the dev stack uses the SQL implementation.
 
 import asyncio
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Protocol
 
@@ -21,6 +22,7 @@ from sqlalchemy import (
     func,
     insert,
     select,
+    update,
 )
 from sqlalchemy.dialects.postgresql import CITEXT, UUID
 from sqlalchemy.exc import IntegrityError
@@ -33,15 +35,26 @@ class Role(StrEnum):
     administrator = "administrator"
 
 
+class AccountStatus(StrEnum):
+    active = "active"
+    deactivated = "deactivated"
+
+
 @dataclass(frozen=True)
 class User:
     id: str
     email: str
     password_hash: str
     role: Role
+    status: AccountStatus = AccountStatus.active
+    created_at: str = field(default_factory=lambda: datetime.now(UTC).isoformat())
 
 
 class EmailTaken(Exception):
+    pass
+
+
+class NoSuchUser(Exception):
     pass
 
 
@@ -53,6 +66,8 @@ class UserStore(Protocol):
     async def get_by_email(self, email: str) -> User | None: ...
     async def get_by_id(self, user_id: str) -> User | None: ...
     async def create(self, email: str, password_hash: str, role: Role) -> User: ...
+    async def list_all(self) -> list[User]: ...
+    async def set_status(self, user_id: str, status: AccountStatus) -> User: ...
 
 
 # ------------------------------------------------------------- PostgreSQL
@@ -66,6 +81,7 @@ users_table = Table(
     Column("email", CITEXT, nullable=False, unique=True),  # citext: 000_extensions.sql
     Column("password_hash", String, nullable=False),
     Column("role", String(16), nullable=False),
+    Column("status", String(16), nullable=False, server_default=AccountStatus.active.value),
     Column("created_at", DateTime(timezone=True), nullable=False, server_default=func.now()),
 )
 
@@ -90,7 +106,12 @@ class SqlUserStore:
     @staticmethod
     def _to_user(row: Row) -> User:
         return User(
-            id=str(row.id), email=row.email, password_hash=row.password_hash, role=Role(row.role)
+            id=str(row.id),
+            email=row.email,
+            password_hash=row.password_hash,
+            role=Role(row.role),
+            status=AccountStatus(row.status),
+            created_at=row.created_at.isoformat(),
         )
 
     async def _one(self, statement: Select) -> User | None:
@@ -122,10 +143,34 @@ class SqlUserStore:
                         email=user.email,
                         password_hash=user.password_hash,
                         role=user.role.value,
+                        status=user.status.value,
                     )
                 )
         except IntegrityError as exc:
             raise EmailTaken(user.email) from exc
+        return await self.get_by_id(user.id)  # type: ignore[return-value]
+
+    async def list_all(self) -> list[User]:
+        await self._ensure_schema()
+        async with self._engine.connect() as conn:
+            rows = (
+                await conn.execute(select(users_table).order_by(users_table.c.created_at))
+            ).all()
+        return [self._to_user(r) for r in rows]
+
+    async def set_status(self, user_id: str, status: AccountStatus) -> User:
+        await self._ensure_schema()
+        async with self._engine.begin() as conn:
+            result = await conn.execute(
+                update(users_table)
+                .where(users_table.c.id == user_id)
+                .values(status=status.value)
+            )
+        if result.rowcount == 0:
+            raise NoSuchUser(user_id)
+        user = await self.get_by_id(user_id)
+        if user is None:
+            raise NoSuchUser(user_id)
         return user
 
 
@@ -151,3 +196,14 @@ class InMemoryUserStore:
         user = User(str(uuid.uuid4()), normalise_email(email), password_hash, role)
         self._by_id[user.id] = user
         return user
+
+    async def list_all(self) -> list[User]:
+        return sorted(self._by_id.values(), key=lambda u: u.created_at)
+
+    async def set_status(self, user_id: str, status: AccountStatus) -> User:
+        user = self._by_id.get(user_id)
+        if user is None:
+            raise NoSuchUser(user_id)
+        updated = User(user.id, user.email, user.password_hash, user.role, status, user.created_at)
+        self._by_id[user_id] = updated
+        return updated

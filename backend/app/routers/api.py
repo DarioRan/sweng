@@ -1,12 +1,15 @@
-"""The five §5.2 endpoints.
+"""The five §5.2 endpoints, plus GET /documents (US-28, an admin-dashboard addition).
 
-/detect (app/vision/detector.py, T-201) and /ask (app/rag/, ADR 0003 and 0004) are
-implemented; /figures/{key} serves the figure or page image a citation names. The others
-return 501 with the contract they will honour: figure (T-207), transcribe (T-403/T-406),
-documents (T-203b).
+/detect (app/vision/detector.py, T-201), /ask (app/rag/, ADR 0003 and 0004) and
+/documents (app/corpus/indexer.py, reusing app/corpus/ingest.py, T-203b) are
+implemented; /figures/{key} serves the figure or page image a citation names. figure
+and transcribe return 501 with the contract they will honour: figure (T-207),
+transcribe (T-403/T-406).
 """
 
 import asyncio
+import uuid
+from pathlib import Path
 from typing import Annotated
 
 import httpx
@@ -34,9 +37,12 @@ from app.contracts import (
     DocumentUploadResponse,
     FigureKind,
     FigureResponse,
+    ManualResponse,
     Provenance,
     TranscribeResponse,
 )
+from app.corpus.indexer import Indexer, get_indexer
+from app.documents import DocumentStore
 from app.rag.service import get_pipeline
 from app.security import require_roles
 from app.users import Role
@@ -54,6 +60,7 @@ _NOT_IMPLEMENTED = HTTPException(
 
 
 MAX_PHOTO_BYTES = 10 * 1024 * 1024  # the client compresses to 2 MB (T-403); this is a guard
+MAX_PDF_BYTES = 50 * 1024 * 1024
 
 
 def get_detector(request: Request) -> Detector:
@@ -62,6 +69,10 @@ def get_detector(request: Request) -> Detector:
         detector = Detector(request.app.state.stores.settings.detector_weights)
         request.app.state.detector = detector
     return detector
+
+
+def get_document_store(request: Request) -> DocumentStore:
+    return request.app.state.documents
 
 
 @router.post("/detect", response_model=DetectResponse, dependencies=REPAIR)
@@ -156,12 +167,85 @@ async def transcribe(audio: Annotated[UploadFile, File()]) -> TranscribeResponse
     raise _NOT_IMPLEMENTED
 
 
-@router.post("/documents", response_model=DocumentUploadResponse, dependencies=CORPUS)
+@router.post(
+    "/documents",
+    response_model=DocumentUploadResponse,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=CORPUS,
+)
 async def upload_document(
     pdf: Annotated[UploadFile, File()],
     source: Annotated[str, Form()],
     licence_basis: Annotated[str, Form()],
     retrieval_date: Annotated[str, Form()],
+    indexer: Annotated[Indexer, Depends(get_indexer)],
+    store: Annotated[DocumentStore, Depends(get_document_store)],
 ) -> DocumentUploadResponse:
-    Provenance(source=source, licence_basis=licence_basis, retrieval_date=retrieval_date)
-    raise _NOT_IMPLEMENTED
+    """Parse, chunk, embed and index the PDF (Rule 4, 5; app/corpus/ingest.py), and record
+    its provenance. Indexing runs before this returns: an admin upload is rare and the
+    manual must be searchable before the response says it is."""
+    provenance = Provenance(
+        source=source, licence_basis=licence_basis, retrieval_date=retrieval_date
+    )
+    data = await pdf.read(MAX_PDF_BYTES + 1)
+    if len(data) > MAX_PDF_BYTES:
+        raise HTTPException(status.HTTP_413_CONTENT_TOO_LARGE, "PDF over 50 MB")
+    filename = pdf.filename or "manual.pdf"
+    title = Path(filename).stem.replace("_", " ").replace("-", " ").strip() or filename
+    document_id = f"{uuid.uuid4().hex[:8].upper()}-01"
+    row = {
+        "doc_code": document_id.rsplit("-", 1)[0],
+        "revision": "01",
+        "file_name": filename,
+        "title": title,
+        "components": "",  # not curated at upload time; retrieval scopes by component only
+        "source_url": provenance.source,  # for manuals with no curated components
+        "licence_basis": provenance.licence_basis,
+        "retrieval_date": provenance.retrieval_date,
+    }
+    try:
+        outcome = await indexer.index(row, data, filename)
+    except Exception as err:  # noqa: BLE001 -- recorded as a failed upload, not a 500
+        await store.create(
+            document_id=document_id,
+            title=title,
+            source=provenance.source,
+            licence_basis=provenance.licence_basis,
+            retrieval_date=provenance.retrieval_date,
+            pages=0,
+            status="error",
+            detail=f"{type(err).__name__}: {err}",
+        )
+        raise HTTPException(
+            status.HTTP_503_SERVICE_UNAVAILABLE, f"Could not index the manual: {err}"
+        ) from err
+    doc_status = "indexed" if outcome.status == "ok" else "error"
+    await store.create(
+        document_id=document_id,
+        title=title,
+        source=provenance.source,
+        licence_basis=provenance.licence_basis,
+        retrieval_date=provenance.retrieval_date,
+        pages=outcome.pages,
+        status=doc_status,
+        detail=None if doc_status == "indexed" else outcome.status,
+    )
+    return DocumentUploadResponse(document_id=document_id, indexing_job_id=str(uuid.uuid4()))
+
+
+@router.get("/documents", response_model=list[ManualResponse], dependencies=CORPUS)
+async def list_documents(
+    store: Annotated[DocumentStore, Depends(get_document_store)],
+) -> list[ManualResponse]:
+    return [
+        ManualResponse(
+            document_id=d.document_id,
+            title=d.title,
+            source=d.source,
+            licence_basis=d.licence_basis,
+            retrieval_date=d.retrieval_date,
+            pages=d.pages,
+            status=d.status,
+        )
+        for d in await store.list_all()
+    ]

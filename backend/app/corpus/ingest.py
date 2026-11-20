@@ -2,7 +2,8 @@
 
     docker compose --profile ingest run --rm ingest
 
-Text goes to Qdrant, figures to the figures bucket. Only manuals recorded in
+Text goes to Qdrant, figures to the figures bucket, and a provenance record per manual
+to PostgreSQL, so the admin's manual library lists it. Only manuals recorded in
 provenance.csv are indexed (Rule 4). It is safe to rerun: a manual's old chunks and
 figures are removed before its new ones are written. It prints one row per manual and
 exits non-zero unless every recorded manual is completely indexed and every test
@@ -10,6 +11,7 @@ question finds its page.
 """
 
 import argparse
+import asyncio
 import csv
 import io
 import sys
@@ -23,9 +25,11 @@ from fastembed import SparseTextEmbedding, TextEmbedding
 from minio import Minio
 from pypdf import PdfReader
 from qdrant_client import QdrantClient, models
+from sqlalchemy.ext.asyncio import create_async_engine
 from tokenizers import Tokenizer
 
 from app.config import Settings, get_settings
+from app.documents import DocumentStore, SqlDocumentStore
 from app.corpus.chunks import body, chunk_page, heading, page_sections, published
 from app.corpus.figures import page_figures, page_png
 from app.rag.text import part_codes
@@ -367,6 +371,51 @@ def report(outcomes: list[Outcome], stray: list[str], total: int) -> bool:
     return len(done) == len(outcomes) and total == expected
 
 
+async def record_manuals(
+    store: DocumentStore, results: list[tuple[dict[str, str], Outcome]]
+) -> int:
+    """Write a provenance record per manual, so the admin's manual library lists it (US-28).
+
+    A manual whose PDF is not in the folder was not indexed and gets no record. Returns
+    how many were recorded.
+    """
+    recorded = 0
+    for row, outcome in results:
+        if outcome.status.startswith("MISSING"):
+            continue
+        ok = outcome.status == "ok"
+        await store.upsert(
+            document_id=outcome.manual,
+            title=row["title"],
+            source=row["source_url"],
+            licence_basis=row["licence_basis"],
+            retrieval_date=row["retrieval_date"],
+            pages=outcome.pages,
+            status="indexed" if ok else "error",
+            detail=None if ok else outcome.status,
+        )
+        recorded += 1
+    return recorded
+
+
+def save_records(settings: Settings, results: list[tuple[dict[str, str], Outcome]]) -> None:
+    """record_manuals against PostgreSQL. The index is what matters, so a database that
+    cannot be reached is reported and does not fail the run."""
+    async def run() -> int:
+        engine = create_async_engine(settings.database_url)
+        try:
+            return await record_manuals(SqlDocumentStore(engine), results)
+        finally:
+            await engine.dispose()
+
+    try:
+        count = asyncio.run(run())
+    except Exception as err:  # noqa: BLE001
+        print(f"\nWARNING: manuals not recorded in the database ({type(err).__name__}: {err})")
+        return
+    print(f"\n{count} manual(s) recorded in the admin manual library.")
+
+
 def connect(settings: Settings, collection: str) -> CorpusStores:
     embedder = TextEmbedding(settings.embedder_model)
     # A copy of the embedder's tokenizer that counts in full. The embedder's own one cuts
@@ -412,6 +461,7 @@ def main() -> None:
         outcome = ingest_manual(row, args.manuals, stores)
         print(f"{outcome.manual}: {outcome.status}", flush=True)
         outcomes.append(outcome)
+    save_records(settings, list(zip(rows, outcomes, strict=True)))
 
     recorded = {row["file_name"] for row in rows}
     stray = sorted(p.name for p in args.manuals.glob("*.pdf") if p.name not in recorded)

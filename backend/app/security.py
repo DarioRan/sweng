@@ -21,7 +21,7 @@ from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from app.config import Settings, get_settings
-from app.users import Role, User, UserStore
+from app.users import AccountStatus, Role, User, UserStore
 
 _ALGORITHM = "HS256"
 _hasher = PasswordHasher()
@@ -48,7 +48,10 @@ async def authenticate(store: UserStore, email: str, password: str) -> User | No
     if user is None:
         verify_password(_DUMMY_HASH, password)
         return None
-    return user if verify_password(user.password_hash, password) else None
+    if not verify_password(user.password_hash, password):
+        return None
+    # A deactivated account (US-23) cannot sign in; existing tokens are also rejected below.
+    return user if user.status == AccountStatus.active else None
 
 
 # ------------------------------------------------------------- tokens
@@ -110,7 +113,9 @@ async def current_user(
         raise _UNAUTHENTICATED
     user_id = decode_token(credentials.credentials, settings)
     user = await store.get_by_id(user_id) if user_id else None
-    if user is None:
+    # Deactivated after the token was issued: the token stays validly signed, so the
+    # status is re-checked on every request, same as the role (module docstring).
+    if user is None or user.status != AccountStatus.active:
         raise _UNAUTHENTICATED
     return user
 
