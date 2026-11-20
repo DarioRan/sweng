@@ -29,9 +29,9 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from tokenizers import Tokenizer
 
 from app.config import Settings, get_settings
-from app.documents import DocumentStore, SqlDocumentStore
 from app.corpus.chunks import body, chunk_page, heading, page_sections, published
 from app.corpus.figures import page_figures, page_png
+from app.documents import DocumentStore, SqlDocumentStore
 from app.rag.text import part_codes
 
 BATCH = 64
