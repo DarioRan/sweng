@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 
 from app.config import Settings, get_settings
 from app.security import authenticate, get_user_store, hash_password, issue_token, require_roles
-from app.users import EmailTaken, Role, User, UserStore
+from app.users import AccountStatus, EmailTaken, NoSuchUser, Role, User, UserStore
 
 router = APIRouter(prefix="/api", tags=["auth"])
 
@@ -43,6 +43,24 @@ class UserResponse(BaseModel):
     @classmethod
     def of(cls, user: User) -> "UserResponse":
         return cls(id=user.id, email=user.email, role=user.role)
+
+
+class AccountResponse(UserResponse):
+    """UserResponse plus what the admin dashboard needs to manage the account (US-23)."""
+
+    status: AccountStatus
+    created_at: str
+
+    @classmethod
+    def of(cls, user: User) -> "AccountResponse":
+        return cls(
+            id=user.id, email=user.email, role=user.role, status=user.status,
+            created_at=user.created_at,
+        )
+
+
+class StatusUpdate(BaseModel):
+    status: AccountStatus
 
 
 async def _create(store: UserStore, body: Credentials, role: Role) -> User:
@@ -87,11 +105,37 @@ async def me(user: Annotated[User, Depends(require_roles(*ANY_ROLE))]) -> UserRe
 
 @router.post(
     "/admin/users",
-    response_model=UserResponse,
+    response_model=AccountResponse,
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(require_roles(Role.administrator))],
 )
 async def create_user(
     body: NewUser, store: Annotated[UserStore, Depends(get_user_store)]
-) -> UserResponse:
-    return UserResponse.of(await _create(store, body, body.role))
+) -> AccountResponse:
+    return AccountResponse.of(await _create(store, body, body.role))
+
+
+@router.get(
+    "/admin/users",
+    response_model=list[AccountResponse],
+    dependencies=[Depends(require_roles(Role.administrator))],
+)
+async def list_users(store: Annotated[UserStore, Depends(get_user_store)]) -> list[AccountResponse]:
+    return [AccountResponse.of(u) for u in await store.list_all()]
+
+
+@router.patch("/admin/users/{user_id}", response_model=AccountResponse)
+async def set_user_status(
+    user_id: str,
+    body: StatusUpdate,
+    store: Annotated[UserStore, Depends(get_user_store)],
+    admin: Annotated[User, Depends(require_roles(Role.administrator))],
+) -> AccountResponse:
+    if user_id == admin.id and body.status == AccountStatus.deactivated:
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST, "You cannot deactivate your own account."
+        )
+    try:
+        return AccountResponse.of(await store.set_status(user_id, body.status))
+    except NoSuchUser:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "No such account.") from None

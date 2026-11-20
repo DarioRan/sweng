@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.config import get_settings
+from app.documents import SqlDocumentStore
 from app.routers import api, auth
 from app.stores import Stores
 from app.users import SqlUserStore
@@ -19,6 +20,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     settings = get_settings()
     app.state.stores = Stores.from_settings(settings)
     app.state.users = SqlUserStore(app.state.stores.db)
+    app.state.documents = SqlDocumentStore(app.state.stores.db)
     if settings.auth_disabled:
         logging.getLogger("uvicorn.error").warning(
             "AUTH_DISABLED=true: requests without a token pass every role check"

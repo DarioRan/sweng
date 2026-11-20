@@ -198,7 +198,7 @@ def test_wrong_role_is_rejected(
         (Role.owner, "POST", "/api/ask", {"json": ASK}, 200),
         (Role.technician, "POST", "/api/ask", {"json": ASK}, 200),
         (Role.technician, "GET", "/api/figure?component=chain", {}, 501),
-        (Role.administrator, "POST", "/api/documents", DOCUMENT, 501),
+        (Role.administrator, "POST", "/api/documents", DOCUMENT, 201),
     ],
 )
 def test_right_role_reaches_the_endpoint(
@@ -226,6 +226,149 @@ def test_administrator_creates_a_technician(client: TestClient, auth_header: Aut
     assert login.json()["role"] == "technician"
 
 
+# --------------------------------------------------------- admin: accounts (US-23)
+
+
+def test_administrator_lists_every_account(client: TestClient, auth_header: AuthHeader) -> None:
+    admin = auth_header(Role.administrator)
+    client.post(
+        "/api/admin/users",
+        headers=admin,
+        json={"email": "tech@example.com", "password": PASSWORD, "role": "technician"},
+    )
+    response = client.get("/api/admin/users", headers=admin)
+    assert response.status_code == 200
+    emails = {u["email"] for u in response.json()}
+    assert "tech@example.com" in emails
+    assert all(u["status"] == "active" and "created_at" in u for u in response.json())
+
+
+def test_administrator_deactivates_and_reactivates_an_account(
+    client: TestClient, auth_header: AuthHeader
+) -> None:
+    admin = auth_header(Role.administrator)
+    created = client.post(
+        "/api/admin/users",
+        headers=admin,
+        json={"email": "tech@example.com", "password": PASSWORD, "role": "technician"},
+    ).json()
+
+    off = client.patch(
+        f"/api/admin/users/{created['id']}", headers=admin, json={"status": "deactivated"}
+    )
+    assert off.status_code == 200
+    assert off.json()["status"] == "deactivated"
+
+    # A deactivated account cannot sign in...
+    login = client.post(
+        "/api/auth/login", json={"email": "tech@example.com", "password": PASSWORD}
+    )
+    assert login.status_code == 401
+
+    # ...and an already-issued token stops working too.
+    login_before = client.post(
+        "/api/admin/users",
+        headers=admin,
+        json={"email": "tech2@example.com", "password": PASSWORD, "role": "technician"},
+    )
+    tech_login = client.post(
+        "/api/auth/login", json={"email": "tech2@example.com", "password": PASSWORD}
+    )
+    tech_header = {"Authorization": f"Bearer {tech_login.json()['access_token']}"}
+    assert client.get("/api/auth/me", headers=tech_header).status_code == 200
+    client.patch(
+        f"/api/admin/users/{login_before.json()['id']}",
+        headers=admin,
+        json={"status": "deactivated"},
+    )
+    assert client.get("/api/auth/me", headers=tech_header).status_code == 401
+
+    back_on = client.patch(
+        f"/api/admin/users/{created['id']}", headers=admin, json={"status": "active"}
+    )
+    assert back_on.json()["status"] == "active"
+    assert client.post(
+        "/api/auth/login", json={"email": "tech@example.com", "password": PASSWORD}
+    ).status_code == 200
+
+
+def test_administrator_cannot_deactivate_their_own_account(
+    client: TestClient, auth_header: AuthHeader
+) -> None:
+    admin = auth_header(Role.administrator)
+    me = client.get("/api/auth/me", headers=admin).json()
+    response = client.patch(
+        f"/api/admin/users/{me['id']}", headers=admin, json={"status": "deactivated"}
+    )
+    assert response.status_code == 400
+
+
+def test_deactivating_an_unknown_account_is_404(
+    client: TestClient, auth_header: AuthHeader
+) -> None:
+    admin = auth_header(Role.administrator)
+    response = client.patch(
+        "/api/admin/users/00000000-0000-0000-0000-000000000000",
+        headers=admin,
+        json={"status": "deactivated"},
+    )
+    assert response.status_code == 404
+
+
+def test_non_administrator_cannot_list_or_deactivate_accounts(
+    client: TestClient, auth_header: AuthHeader
+) -> None:
+    owner = auth_header(Role.owner)
+    assert client.get("/api/admin/users", headers=owner).status_code == 403
+    assert (
+        client.patch(
+            "/api/admin/users/anything", headers=owner, json={"status": "deactivated"}
+        ).status_code
+        == 403
+    )
+
+
+# --------------------------------------------------------- admin: manuals (US-24, FR-04)
+
+
+def test_administrator_uploads_and_lists_a_manual(
+    client: TestClient, auth_header: AuthHeader, indexer
+) -> None:
+    admin = auth_header(Role.administrator)
+    response = client.post("/api/documents", headers=admin, **DOCUMENT)
+    assert response.status_code == 201
+    body = response.json()
+    assert body["document_id"]
+    assert body["indexing_job_id"]
+    assert indexer.calls and indexer.calls[0]["filename"] == "m.pdf"
+
+    listed = client.get("/api/documents", headers=admin)
+    assert listed.status_code == 200
+    (manual,) = [m for m in listed.json() if m["document_id"] == body["document_id"]]
+    assert manual["status"] == "indexed"
+    assert manual["pages"] == indexer.pages
+    assert manual["source"] == "s"
+    assert manual["licence_basis"] == "l"
+
+
+def test_a_manual_the_indexer_could_not_read_is_recorded_as_an_error(
+    client: TestClient, auth_header: AuthHeader, indexer
+) -> None:
+    indexer.ok = False
+    admin = auth_header(Role.administrator)
+    response = client.post("/api/documents", headers=admin, **DOCUMENT)
+    assert response.status_code == 201  # the upload succeeded; the record says indexing did not
+    document_id = response.json()["document_id"]
+
+    listed = client.get("/api/documents", headers=admin).json()
+    (manual,) = [m for m in listed if m["document_id"] == document_id]
+    assert manual["status"] == "error"
+
+
+def test_non_administrator_cannot_list_manuals(client: TestClient, auth_header: AuthHeader) -> None:
+    assert client.get("/api/documents", headers=auth_header(Role.owner)).status_code == 403
+
+
 # ------------------------------------------------------------- development bypass
 
 
@@ -251,7 +394,7 @@ def test_bypass_lets_tokenless_requests_through_every_role(
     client: TestClient, auth_disabled: None, ask_stub: None
 ) -> None:
     assert client.post("/api/ask", json=ASK).status_code == 200
-    assert client.post("/api/documents", **DOCUMENT).status_code == 501
+    assert client.post("/api/documents", **DOCUMENT).status_code == 201
 
 
 def test_bypass_still_checks_requests_with_a_token(

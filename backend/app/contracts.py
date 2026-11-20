@@ -120,3 +120,16 @@ class Provenance(BaseModel):
 class DocumentUploadResponse(BaseModel):
     document_id: str
     indexing_job_id: str
+
+
+# ------------------------------------------------------- GET /documents (US-24, US-28)
+class ManualResponse(BaseModel):
+    """One row of the admin dashboard's manual list."""
+
+    document_id: str
+    title: str
+    source: str
+    licence_basis: str
+    retrieval_date: str
+    pages: int
+    status: str  # "indexed" | "error"

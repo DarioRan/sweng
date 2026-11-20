@@ -11,7 +11,11 @@ import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
 
 from app.config import get_settings  # noqa: E402
+from app.corpus.indexer import get_indexer  # noqa: E402
+from app.corpus.ingest import Outcome  # noqa: E402
+from app.documents import InMemoryDocumentStore  # noqa: E402
 from app.main import app  # noqa: E402
+from app.routers.api import get_document_store  # noqa: E402
 from app.security import get_user_store, hash_password, issue_token  # noqa: E402
 from app.users import InMemoryUserStore, Role  # noqa: E402
 
@@ -27,7 +31,44 @@ def users() -> Iterator[InMemoryUserStore]:
 
 
 @pytest.fixture
-def client(users: InMemoryUserStore) -> Iterator[TestClient]:
+def documents() -> Iterator[InMemoryDocumentStore]:
+    store = InMemoryDocumentStore()
+    app.dependency_overrides[get_document_store] = lambda: store
+    yield store
+    app.dependency_overrides.pop(get_document_store, None)
+
+
+class FakeIndexer:
+    """Stands in for app.corpus.indexer.CorpusIndexer: no Qdrant, S3 or embedder touched."""
+
+    def __init__(self, pages: int = 3, ok: bool = True) -> None:
+        self.pages = pages
+        self.ok = ok
+        self.calls: list[dict] = []
+
+    async def index(self, row: dict[str, str], pdf_bytes: bytes, filename: str) -> Outcome:
+        self.calls.append({"row": row, "filename": filename, "size": len(pdf_bytes)})
+        return Outcome(
+            manual=f"{row.get('doc_code')}-{row.get('revision')}",
+            status="ok" if self.ok else "NO TEXT: stub indexer",
+            pages=self.pages,
+            chunks=self.pages,
+            indexed=self.pages,
+        )
+
+
+@pytest.fixture
+def indexer() -> Iterator[FakeIndexer]:
+    fake = FakeIndexer()
+    app.dependency_overrides[get_indexer] = lambda: fake
+    yield fake
+    app.dependency_overrides.pop(get_indexer, None)
+
+
+@pytest.fixture
+def client(
+    users: InMemoryUserStore, documents: InMemoryDocumentStore, indexer: FakeIndexer
+) -> Iterator[TestClient]:
     with TestClient(app) as c:
         yield c
 

@@ -7,6 +7,7 @@ import { App } from "./App";
 import { searchComponents } from "./components";
 import { ConfirmComponent, candidates } from "./Identify";
 import { loadJobs } from "./jobs";
+import { saveSession } from "./session";
 
 const citation = {
   document_id: "DM-RD0001-06",
@@ -154,6 +155,7 @@ it("keeps one candidate per class, best first", () => {
 
 // ------------------------------------------------------------- the flow (T-407)
 it("goes from a new repair to a cited answer, and saves it to the job", async () => {
+  saveSession({ token: "t", id: "u1", email: "owner@example.com", role: "owner" });
   const fetchMock = vi.fn(async (url: string, _init?: RequestInit) => {
     if (url === "/health") return { ok: true, json: async () => health };
     if (url === "/api/ask") return { ok: true, json: async () => answered };
@@ -184,7 +186,72 @@ it("goes from a new repair to a cited answer, and saves it to the job", async ()
 });
 
 it("says so when the backend is unreachable", async () => {
+  saveSession({ token: "t", id: "u1", email: "owner@example.com", role: "owner" });
   vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("connection refused")));
   render(<App />);
   expect(await screen.findByText("Backend unreachable: connection refused")).toBeTruthy();
+});
+
+// --------------------------------------------------------------- auth (T-402)
+it("signs in and lands on the repair flow for an owner", async () => {
+  const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
+    if (url === "/api/auth/login") {
+      expect(JSON.parse(String(init!.body))).toEqual({
+        email: "owner@example.com",
+        password: "owner1234",
+      });
+      return { ok: true, json: async () => ({ access_token: "t", token_type: "bearer", role: "owner" }) };
+    }
+    if (url === "/health") return { ok: true, json: async () => health };
+    throw new Error(`unexpected ${url}`);
+  });
+  vi.stubGlobal("fetch", fetchMock);
+
+  render(<App />);
+  expect(screen.getByRole("heading", { name: "Sign in" })).toBeTruthy();
+  fireEvent.change(screen.getByLabelText("Email"), { target: { value: "owner@example.com" } });
+  fireEvent.change(screen.getByLabelText("Password"), { target: { value: "owner1234" } });
+  fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
+
+  expect(await screen.findByText("What needs fixing?")).toBeTruthy();
+});
+
+it("routes an administrator to the admin dashboard instead of the repair flow", async () => {
+  const fetchMock = vi.fn(async (url: string, _init?: RequestInit) => {
+    if (url === "/api/auth/login") {
+      return {
+        ok: true,
+        json: async () => ({ access_token: "t", token_type: "bearer", role: "administrator" }),
+      };
+    }
+    if (url === "/api/admin/users") return { ok: true, json: async () => [] };
+    throw new Error(`unexpected ${url}`);
+  });
+  vi.stubGlobal("fetch", fetchMock);
+
+  render(<App />);
+  fireEvent.change(screen.getByLabelText("Email"), { target: { value: "admin@example.com" } });
+  fireEvent.change(screen.getByLabelText("Password"), { target: { value: "admin1234" } });
+  fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
+
+  expect(await screen.findByRole("heading", { name: "Administration" })).toBeTruthy();
+  expect(screen.queryByText("What needs fixing?")).toBeNull();
+});
+
+it("rejects a wrong password without starting a repair", async () => {
+  const fetchMock = vi.fn(async (url: string) => {
+    if (url === "/api/auth/login") {
+      return { ok: false, status: 401, statusText: "Unauthorized", json: async () => ({ detail: "Wrong email or password." }) };
+    }
+    throw new Error(`unexpected ${url}`);
+  });
+  vi.stubGlobal("fetch", fetchMock);
+
+  render(<App />);
+  fireEvent.change(screen.getByLabelText("Email"), { target: { value: "owner@example.com" } });
+  fireEvent.change(screen.getByLabelText("Password"), { target: { value: "wrongpassword" } });
+  fireEvent.click(screen.getByRole("button", { name: "Sign in" }));
+
+  expect(await screen.findByText("Wrong email or password.")).toBeTruthy();
+  expect(screen.queryByText("What needs fixing?")).toBeNull();
 });
