@@ -1,4 +1,9 @@
-"""The ingest CLI records each manual it indexed, so the admin manual library lists it."""
+"""The ingest CLI records each manual it indexed, so the admin manual library lists it.
+
+Plain functions running asyncio.run: CI has no async pytest plugin.
+"""
+
+import asyncio
 
 from app.corpus.ingest import Outcome, record_manuals
 from app.documents import InMemoryDocumentStore
@@ -17,7 +22,7 @@ def _row(code: str, title: str) -> dict[str, str]:
     }
 
 
-async def test_records_indexed_and_failed_manuals_but_not_missing_ones():
+def test_records_indexed_and_failed_manuals_but_not_missing_ones():
     store = InMemoryDocumentStore()
     results = [
         (_row("DM-A", "Crankset"), Outcome("DM-A-06", "ok", pages=40)),
@@ -25,9 +30,9 @@ async def test_records_indexed_and_failed_manuals_but_not_missing_ones():
         (_row("DM-C", "Brake"), Outcome("DM-C-06", "MISSING: not in the folder")),
     ]
 
-    assert await record_manuals(store, results) == 2
+    assert asyncio.run(record_manuals(store, results)) == 2
 
-    records = {r.document_id: r for r in await store.list_all()}
+    records = {r.document_id: r for r in asyncio.run(store.list_all())}
     assert set(records) == {"DM-A-06", "DM-B-06"}
     assert records["DM-A-06"].status == "indexed"
     assert records["DM-A-06"].pages == 40
@@ -37,11 +42,13 @@ async def test_records_indexed_and_failed_manuals_but_not_missing_ones():
     assert records["DM-B-06"].detail == "NO DATE: not found"
 
 
-async def test_rerunning_replaces_the_record():
+def test_rerunning_replaces_the_record():
     store = InMemoryDocumentStore()
-    await record_manuals(store, [(_row("DM-A", "Crankset"), Outcome("DM-A-06", "UNREADABLE: x"))])
-    await record_manuals(store, [(_row("DM-A", "Crankset"), Outcome("DM-A-06", "ok", pages=40))])
+    failed = Outcome("DM-A-06", "UNREADABLE: x")
+    asyncio.run(record_manuals(store, [(_row("DM-A", "Crankset"), failed)]))
+    indexed = Outcome("DM-A-06", "ok", pages=40)
+    asyncio.run(record_manuals(store, [(_row("DM-A", "Crankset"), indexed)]))
 
-    [record] = await store.list_all()
+    [record] = asyncio.run(store.list_all())
     assert record.status == "indexed"
     assert record.pages == 40
